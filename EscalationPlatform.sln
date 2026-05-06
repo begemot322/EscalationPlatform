@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EscalationService", "EscalationService", "{D66904EB-A796-48BD-B92D-BA7602566404}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationService.Api", "src\backend\EscalationService\EscalationService.Api\EscalationService.Api.csproj", "{09A709EA-6298-4404-A872-1F4323742191}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationPlatform.Bus.RabbitMq", "src\backend\EscalationPlatform.Bus.RabbitMq\EscalationPlatform.Bus.RabbitMq.csproj", "{ADC8C451-632F-41D0-ABE6-61A291CD1E23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationPlatform.Database.PgSql", "src\backend\EscalationPlatform.Database.PgSql\EscalationPlatform.Database.PgSql.csproj", "{AF914DEC-7080-460E-BE93-B46FCC22111F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationService.Domain", "src\backend\EscalationService\EscalationService.Domain\EscalationService.Domain.csproj", "{46035903-DF79-4F3A-8892-27A74D8EEF33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EscalationService.Infrastructure", "src\backend\EscalationService\EscalationService.Infrastructure\EscalationService.Infrastructure.csproj", "{A336FCF6-85D4-456D-9460-7BD4B358AEF6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{09A709EA-6298-4404-A872-1F4323742191} = {D66904EB-A796-48BD-B92D-BA7602566404}
+		{46035903-DF79-4F3A-8892-27A74D8EEF33} = {D66904EB-A796-48BD-B92D-BA7602566404}
+		{A336FCF6-85D4-456D-9460-7BD4B358AEF6} = {D66904EB-A796-48BD-B92D-BA7602566404}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09A709EA-6298-4404-A872-1F4323742191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09A709EA-6298-4404-A872-1F4323742191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09A709EA-6298-4404-A872-1F4323742191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09A709EA-6298-4404-A872-1F4323742191}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADC8C451-632F-41D0-ABE6-61A291CD1E23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADC8C451-632F-41D0-ABE6-61A291CD1E23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADC8C451-632F-41D0-ABE6-61A291CD1E23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADC8C451-632F-41D0-ABE6-61A291CD1E23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF914DEC-7080-460E-BE93-B46FCC22111F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF914DEC-7080-460E-BE93-B46FCC22111F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF914DEC-7080-460E-BE93-B46FCC22111F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF914DEC-7080-460E-BE93-B46FCC22111F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46035903-DF79-4F3A-8892-27A74D8EEF33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46035903-DF79-4F3A-8892-27A74D8EEF33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46035903-DF79-4F3A-8892-27A74D8EEF33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46035903-DF79-4F3A-8892-27A74D8EEF33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A336FCF6-85D4-456D-9460-7BD4B358AEF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A336FCF6-85D4-456D-9460-7BD4B358AEF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A336FCF6-85D4-456D-9460-7BD4B358AEF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A336FCF6-85D4-456D-9460-7BD4B358AEF6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
