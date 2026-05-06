@@ -1,0 +1,58 @@
+services:
+  
+  escalationdb:
+    image: postgres
+    container_name: escalationdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: EscalationDb
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - escalation_data:/var/lib/postgresql/data
+
+  userdb:
+    image: postgres
+    container_name: userdb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: UserDb
+    restart: always
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_data:/var/lib/postgresql/data
+
+  messagebroker:
+    image: rabbitmq:management
+    container_name: messagebroker
+    hostname: messagebroker
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: kolya
+      MINIO_ROOT_PASSWORD: 123123123
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    
+volumes:
+  escalation_data:
+  user_data:
+  minio_data:
