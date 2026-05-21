@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace EscalationPlatform.Database.PgSql;
@@ -12,7 +13,7 @@ public static class DatabaseServiceExtensions
      /// <summary>
     /// Имя строки подключения к базе данных
     /// </summary>
-    public const string ConnectionStringName = "Db";
+    public const string ConnectionStringName = "Database";
 
     /// <summary>
     /// Имя секции конфигурации базы данных.
@@ -26,14 +27,18 @@ public static class DatabaseServiceExtensions
     /// <param name="migrationsAssembly">Ссылка на сборку, содержащую миграции Entity Framework</param>
     /// <param name="connectionString">Строка подключения к базе данных</param>
     /// <param name="databaseConfiguration">Конфигурация базы данных</param>
+    /// <param name="configureDbContext">Дополнительная настройка контекста базы данных</param>
     /// <exception cref="ApplicationException">Выбрасывается, если строка подключения пуста или null.</exception>
     public static IServiceCollection AddPostgres<TDbContext>(this IServiceCollection services, string? connectionString,
-        string migrationsAssembly, DatabaseConfiguration? databaseConfiguration = null)  where TDbContext : DbContext
+        string migrationsAssembly, DatabaseConfiguration? databaseConfiguration = null,
+        Action<IServiceProvider, DbContextOptionsBuilder>? configureDbContext = null)  where TDbContext : DbContext
     {
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
         databaseConfiguration ??= new DatabaseConfiguration();
-
-        services.AddDbContextPool<TDbContext>(builder =>
+        
+        services.TryAddSingleton(TimeProvider.System);
+        
+        services.AddDbContextPool<TDbContext>((sp, builder) =>
         {
             builder.UseNpgsql(connectionString,
                     npgsql =>
@@ -50,6 +55,8 @@ public static class DatabaseServiceExtensions
                             npgsql.CommandTimeout(databaseConfiguration.CommandTimeout);
                     })
                 .UseSnakeCaseNamingConvention();
+            
+            configureDbContext?.Invoke(sp, builder);
 
             if (!databaseConfiguration.LogSensitiveData) return;
             builder.EnableSensitiveDataLogging();

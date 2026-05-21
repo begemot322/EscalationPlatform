@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+        <PackageReference Include="MailKit" Version="4.15.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.13" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.13" />
+    </ItemGroup>
+
+</Project>
