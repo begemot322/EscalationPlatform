@@ -9,6 +9,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.15"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.16">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,7 +23,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
+      <ProjectReference Include="..\..\EscalationPlatform.Bus.RabbitMq\EscalationPlatform.Bus.RabbitMq.csproj" />
+      <ProjectReference Include="..\..\EscalationPlatform.Database.PgSql\EscalationPlatform.Database.PgSql.csproj" />
+      <ProjectReference Include="..\..\EscalationPlatform.OpenTelemetry\EscalationPlatform.OpenTelemetry.csproj" />
+      <ProjectReference Include="..\EscalationService.Infrastructure\EscalationService.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
