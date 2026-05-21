@@ -8,9 +8,12 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.15" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.16" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\EscalationPlatform.Database.PgSql\EscalationPlatform.Database.PgSql.csproj" />
+      <ProjectReference Include="..\EscalationService.Application\EscalationService.Application.csproj" />
       <ProjectReference Include="..\EscalationService.Domain\EscalationService.Domain.csproj" />
     </ItemGroup>
 
