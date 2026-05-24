@@ -1,10 +1,12 @@
 using EscalationPlatform.Shared.Pagination;
 using EscalationService.Application.DTOs.Project;
 using EscalationService.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EscalationService.Api.Controllers;
 
+[Authorize]
 public sealed class ProjectController : BaseController
 {
     private readonly IProjectService _projectService;

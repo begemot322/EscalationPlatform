@@ -19,4 +19,5 @@ public sealed record ProjectResponse(
     bool IsActive,
     DateTimeOffset? ArchivedAt,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    IReadOnlyList<ProjectOwnerResponse> Owners);

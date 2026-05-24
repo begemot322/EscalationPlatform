@@ -55,6 +55,7 @@ public async Task<Result<PagedResult<ProjectResponse>>> GetAllAsync(ProjectFilte
     {
         var project = await _db.Projects
             .AsNoTracking()
+            .Include(p => p.Owners)
             .FirstOrDefaultAsync(p => p.Id == id, ct);
 
         if (project is null)
@@ -185,5 +186,6 @@ public async Task<Result<PagedResult<ProjectResponse>>> GetAllAsync(ProjectFilte
 
     private static ProjectResponse ToResponse(Project p) => new(
         p.Id, p.Name, p.Description, p.Code,
-        p.IsActive, p.ArchivedAt, p.CreatedAt, p.UpdatedAt);
+        p.IsActive, p.ArchivedAt, p.CreatedAt, p.UpdatedAt,
+        p.Owners.Select(o => new ProjectOwnerResponse(o.UserId, o.Role, o.AssignedAt)).ToList());
 }
