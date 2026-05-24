@@ -2,11 +2,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using EscalationPlatform.Shared.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Common.Interfaces.Identity;
-using UserService.Application.Common.Options;
 using UserService.Domain;
+using UserService.Domain.Entities;
 
 namespace UserService.Infrastructure.Identity;
 

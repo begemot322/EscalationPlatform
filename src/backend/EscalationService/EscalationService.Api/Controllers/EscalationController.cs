@@ -1,6 +1,7 @@
 using EscalationPlatform.Shared.Pagination;
 using EscalationService.Application.DTOs.Escalation;
 using EscalationService.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EscalationService.Api.Controllers;
@@ -15,6 +16,7 @@ public sealed class EscalationController : BaseController
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll(
         [FromQuery] EscalationFilter? filter,
         [FromQuery] SortParams? sortParams,

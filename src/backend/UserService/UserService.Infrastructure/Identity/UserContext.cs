@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using UserService.Application.Common.Interfaces.Identity;
 using UserService.Domain;
+using UserService.Domain.Enums;
 
 namespace UserService.Infrastructure.Identity;
 

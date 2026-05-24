@@ -1,4 +1,4 @@
-using UserService.Application.Common.Interfaces;
+using UserService.Application.Common.Interfaces.Identity;
 
 namespace UserService.Infrastructure.Identity;
 

@@ -8,6 +8,7 @@ using UserService.Application.Common.Interfaces.Identity;
 using UserService.Application.DTOs;
 using UserService.Application.Services.Interfaces;
 using UserService.Domain;
+using UserService.Domain.Entities;
 
 namespace UserService.Application.Services.Implementation;
 
@@ -15,7 +16,7 @@ public sealed class OtpService : IOtpService
 {
     private const int OtpExpiresMinutes = 3;
     private const int ResendCooldownSeconds = 60;
-
+    
     private readonly IUserDbContext _db;
     private readonly IJwtProvider _jwtProvider;
     private readonly IPublishEndpoint _publishEndpoint;
@@ -40,10 +41,10 @@ public sealed class OtpService : IOtpService
 
         if (user is null)
             return Result<OtpSentResponse>.Failure(Error.NotFound<User>(email));
-
+        
         if (user.IsEmailVerified)
-            return Result<OtpSentResponse>.Failure(Error.ValidationFailed("Email уже подтверждён."));
-
+            return Result<OtpSentResponse>.Failure(Error.OtpAlreadyVerified());
+        
         var existing = await _db.OtpCodes
             .Where(o => o.UserId == user.Id)
             .OrderByDescending(o => o.CreatedAt)
@@ -54,8 +55,7 @@ public sealed class OtpService : IOtpService
         {
             var secondsLeft = (int)(existing.CreatedAt.AddSeconds(ResendCooldownSeconds)
                                     - DateTime.UtcNow).TotalSeconds;
-            return Result<OtpSentResponse>.Failure(
-                Error.ValidationFailed($"Повторная отправка доступна через {secondsLeft} сек."));
+            return Result<OtpSentResponse>.Failure(Error.OtpResendTooSoon(secondsLeft));
         }
 
         var code = GenerateOtpCode();
@@ -68,7 +68,6 @@ public sealed class OtpService : IOtpService
             existing.Code = code;
             existing.CreatedAt = now;
             existing.ExpiresAt = expiresAt;
-            existing.IsUsed = false;
         }
         else
         {
@@ -89,7 +88,7 @@ public sealed class OtpService : IOtpService
         await _publishEndpoint.Publish(
             new OtpCodeRequested(email, user.FirstName, code, OtpExpiresMinutes), ct);
 
-        return Result<OtpSentResponse>.Success(new OtpSentResponse(expiresAt, canResendAt));
+        return Result<OtpSentResponse>.Success(new OtpSentResponse(canResendAt));
     }
 
     public async Task<Result<AuthResponse>> VerifyAsync(VerifyOtpDto dto, CancellationToken ct = default)
@@ -97,8 +96,8 @@ public sealed class OtpService : IOtpService
         var validation = await _verifyValidator.ValidateAsync(dto, ct);
         if (!validation.IsValid)
             return Result<AuthResponse>.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == dto.Email, ct);
 
@@ -106,19 +105,18 @@ public sealed class OtpService : IOtpService
             return Result<AuthResponse>.Failure(Error.NotFound<User>(dto.Email));
 
         if (user.IsEmailVerified)
-            return Result<AuthResponse>.Failure(Error.ValidationFailed("Email уже подтверждён."));
+            return Result<AuthResponse>.Failure(Error.OtpAlreadyVerified());
 
         var otp = await _db.OtpCodes
             .Where(o => o.UserId == user.Id
                         && o.Code == dto.Code
-                        && !o.IsUsed
                         && o.ExpiresAt > DateTime.UtcNow)
             .FirstOrDefaultAsync(ct);
 
         if (otp is null)
-            return Result<AuthResponse>.Failure(Error.ValidationFailed("Неверный или истёкший код."));
+            return Result<AuthResponse>.Failure(Error.OtpInvalidOrExpired());
 
-        otp.IsUsed = true;
+        _db.OtpCodes.Remove(otp);
         user.IsEmailVerified = true;
         await _db.SaveChangesAsync(ct);
 

@@ -1,5 +1,6 @@
-﻿
-namespace UserService.Domain;
+﻿using UserService.Domain.Enums;
+
+namespace UserService.Domain.Entities;
 
 /// <summary>
 /// Представляет пользователя системы.
@@ -25,12 +26,7 @@ public class User
     /// Email пользователя.
     /// </summary>
     public string Email { get; set; } = null!;
-
-    /// <summary>
-    /// Номер телефона пользователя.
-    /// </summary>
-    public string? PhoneNumber { get; set; }
-
+    
     /// <summary>
     /// Хэш пароля пользователя.
     /// </summary>
@@ -45,6 +41,11 @@ public class User
     /// Роль пользователя в системе.
     /// </summary>
     public UserRole Role { get; set; }
+    
+    /// <summary>
+    /// Должность пользователя.
+    /// </summary>
+    public WorkType WorkType { get; set; }
 
     /// <summary>
     /// Признак подтвержденного email.

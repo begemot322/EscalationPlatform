@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserService.Domain;
+using UserService.Domain.Entities;
+using UserService.Domain.Enums;
 using UserService.Infrastructure.Persistence.Converters;
 
 namespace UserService.Infrastructure.Persistence.Configurations;
@@ -17,12 +19,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email).IsRequired().HasMaxLength(256);
         builder.HasIndex(u => u.Email).IsUnique();
 
-        builder.Property(u => u.PhoneNumber).HasMaxLength(20);
         builder.Property(u => u.PasswordHash).IsRequired();
 
         builder.Property(u => u.Role)
             .IsRequired()
             .HasConversion(new SnakeCaseEnumConverter<UserRole>());
+        
+        builder.Property(u => u.WorkType)
+            .IsRequired()
+            .HasConversion(new SnakeCaseEnumConverter<WorkType>());
 
         builder.Property(u => u.IsEmailVerified).IsRequired();
         builder.Property(u => u.CreatedAt).IsRequired();

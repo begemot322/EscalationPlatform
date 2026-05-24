@@ -26,6 +26,9 @@ public abstract class BaseController : ControllerBase
             _ => StatusCodes.Status500InternalServerError
         };
 
-        return Problem(statusCode: statusCode, title: error.Code, detail: error.Description);
+        return Problem(statusCode: statusCode, title: error.Code, detail: error.Description,
+            extensions: error.Details.Count > 0
+                ? new Dictionary<string, object?> { ["errors"] = error.Details }
+                : null);
     }
 }

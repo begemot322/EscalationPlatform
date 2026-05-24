@@ -1,4 +1,5 @@
 ﻿using UserService.Domain;
+using UserService.Domain.Enums;
 
 namespace UserService.Application.Common.Interfaces.Identity;
 

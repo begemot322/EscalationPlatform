@@ -68,8 +68,8 @@ public sealed class SlaPolicyService : ISlaPolicyService
         var validation = await _createValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result<SlaPolicyResponse>.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var duplicate = await _db.SlaPolicies.AnyAsync(p => p.Name == request.Name, ct);
         if (duplicate)
             return Result<SlaPolicyResponse>.Failure(Error.Duplicate(nameof(SlaPolicy.Name), request.Name));
@@ -97,8 +97,8 @@ public sealed class SlaPolicyService : ISlaPolicyService
         var validation = await _updateValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result<SlaPolicyResponse>.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var policy = await _db.SlaPolicies.FirstOrDefaultAsync(p => p.Id == id, ct);
         if (policy is null)
         {

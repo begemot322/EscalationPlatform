@@ -1,4 +1,4 @@
-﻿namespace UserService.Domain;
+﻿namespace UserService.Domain.Entities;
 
 public class OtpCode
 {

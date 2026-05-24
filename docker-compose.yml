@@ -37,7 +37,9 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  
   minio:
     image: minio/minio
     container_name: minio
@@ -56,3 +58,4 @@ volumes:
   escalation_data:
   user_data:
   minio_data:
+  rabbitmq_data:

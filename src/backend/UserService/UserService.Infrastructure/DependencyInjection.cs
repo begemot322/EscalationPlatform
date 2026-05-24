@@ -1,12 +1,13 @@
+using System.Security.Claims;
 using System.Text;
 using EscalationPlatform.Database.PgSql;
+using EscalationPlatform.Shared.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Application.Common.Interfaces;
 using UserService.Application.Common.Interfaces.Identity;
-using UserService.Application.Common.Options;
 using UserService.Infrastructure.Identity;
 using UserService.Infrastructure.Persistence;
 
@@ -87,7 +88,15 @@ public static class DependencyInjection
                     ValidateAudience = true,
                     ValidAudience = jwtOptions.Audience,
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
+                    RoleClaimType = ClaimTypes.Role
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

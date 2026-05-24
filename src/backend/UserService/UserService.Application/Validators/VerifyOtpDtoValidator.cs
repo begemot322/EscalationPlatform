@@ -8,11 +8,11 @@ public class VerifyOtpDtoValidator : AbstractValidator<VerifyOtpDto>
     public VerifyOtpDtoValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required.")
-            .EmailAddress().WithMessage("Email is not valid.");
+            .NotEmpty()
+            .EmailAddress();
 
         RuleFor(x => x.Code)
-            .NotEmpty().WithMessage("Code is required.")
-            .Matches(@"^\d{6}$").WithMessage("Code must be exactly 6 digits.");
+            .NotEmpty()
+            .Matches(@"^\d{6}$").WithMessage("'Code' must be exactly 6 digits.");
     }
 }

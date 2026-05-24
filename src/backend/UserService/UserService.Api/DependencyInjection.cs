@@ -1,6 +1,7 @@
+using EscalationPlatform.Bus.RabbitMq;
 using EscalationPlatform.OpenTelemetry;
+using EscalationPlatform.Shared.Messages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using UserService.Application;
 using UserService.Infrastructure;
 using UserService.Infrastructure.Persistence;
@@ -28,39 +29,27 @@ public static class DependencyInjection
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Description = "Введите JWT токен"
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    []
-                }
-            });
-        });
+        builder.Services.AddSwaggerGen();
 
         builder.Logging.AddLogging(resourceBuilder, openTelemetryEndpoint);
+        
+        // Конфигурация RabbitMq
+        var rabbitMqConnectionString = configuration.GetConnectionString(BusServiceExtensions.ConnectionStringName);
+        var busConfiguration = configuration
+            .GetSection(BusServiceExtensions.BusConfigurationSectionName)
+            .Get<BusConfiguration>() ?? new BusConfiguration();
 
         builder.Services
             .AddTelemetry(resourceBuilder, openTelemetryEndpoint)
             .AddApplication()
-            .AddInfrastructure(configuration);
+            .AddInfrastructure(configuration)
+            .AddRabbitMq(
+                connectionString: rabbitMqConnectionString,
+                configuration: busConfiguration,
+                configureRabbit: (_, cfg, config) =>
+                {
+                    cfg.ConfigureMessage<OtpCodeRequested>(Exchanges.UserEmailOtpRequested, config);
+                });
 
         return builder;
     }

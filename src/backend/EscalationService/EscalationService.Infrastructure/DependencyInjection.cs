@@ -1,9 +1,15 @@
+using System.Security.Claims;
+using System.Text;
 using EscalationPlatform.Database.PgSql;
+using EscalationPlatform.Shared.Options;
 using EscalationService.Application.Common.Interfaces;
 using EscalationService.Infrastructure.Persistence;
 using EscalationService.Infrastructure.Persistence.Interceptors;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+
 namespace EscalationService.Infrastructure;
 
 /// <summary>
@@ -17,7 +23,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddPersistence(configuration);
+            .AddPersistence(configuration)
+            .AddAuth(configuration);
 
         return services;
     }
@@ -45,6 +52,38 @@ public static class DependencyInjection
                 options.AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 
         services.AddScoped<IEscalationDbContext>(sp => sp.GetRequiredService<EscalationDbContext>());
+
+        return services;
+    }
+    
+    private static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        services.AddAuthorization();
 
         return services;
     }

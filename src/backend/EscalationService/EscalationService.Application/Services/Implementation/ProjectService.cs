@@ -71,8 +71,8 @@ public async Task<Result<PagedResult<ProjectResponse>>> GetAllAsync(ProjectFilte
         var validation = await _createValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var now = DateTimeOffset.UtcNow; 
 
         var project = new Project
@@ -102,8 +102,8 @@ public async Task<Result<PagedResult<ProjectResponse>>> GetAllAsync(ProjectFilte
         var validation = await _updateValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var project = await _db.Projects
             .Include(p => p.Owners)
             .FirstOrDefaultAsync(p => p.Id == id, ct);

@@ -19,13 +19,22 @@ public class AuthController : BaseController
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, CancellationToken ct)
     {
         var result = await _authService.RegisterAsync(dto, ct);
-        return OkOrError(result);
+        return NoContentOrError(result);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto dto, CancellationToken ct)
     {
         var result = await _authService.LoginAsync(dto, ct);
+        if (result.IsSuccess)
+            Response.SetAccessToken(result.Value!.Token);
         return OkOrError(result);
+    }
+    
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.RemoveAccessToken();
+        return NoContent();
     }
 }

@@ -1,8 +1,7 @@
 ﻿using EscalationPlatform.Bus.RabbitMq;
 using EscalationPlatform.OpenTelemetry;
-using MassTransit.Logging;
-using MassTransit.Monitoring;
 using NotificationService.Email;
+using NotificationService.Email.Consumers;
 
 namespace NotificationService.Host;
 
@@ -32,15 +31,20 @@ public static class HostStartup
                     hostContext.Configuration.GetSection(SmtpOptions.ConfigurationSectionName));
                 
                 services
-                    .AddTelemetry(telemetryResource,
-                        hostContext.Configuration.GetConnectionString("Otlp"),
-                        tracingConfigure: cfg => cfg.AddSource(DiagnosticHeaders.DefaultListenerName),
-                        metricsConfigure: cfg => cfg.AddMeter(InstrumentationOptions.MeterName))
+                    .AddTelemetry(telemetryResource, hostContext.Configuration.GetConnectionString("Otlp"))
                     .AddRabbitMq(
                         connectionString: rabbitMqConnectionString,
                         configuration: busConfiguration,
-                        configureRabbit: (_, cfg, config) =>
+                        configureConsumers: mt =>
                         {
+                            mt.AddConsumer<OtpCodeRequestedConsumer>();
+                        },
+                        configureRabbit: (context, cfg, config) =>
+                        {
+                            cfg.ConfigureConsumer<OtpCodeRequestedConsumer>(
+                                context, 
+                                exchangeName: Exchanges.UserEmailOtpRequested, 
+                                config);
                         });
                 
                 services.AddScoped<IEmailSender, MailKitSmtpService>();

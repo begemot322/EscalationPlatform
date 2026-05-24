@@ -78,8 +78,8 @@ public sealed class EscalationService : IEscalationService
         var validation = await _createValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var slaPolicyExists = await _db.SlaPolicies.AnyAsync(p => p.Id == request.SlaPolicyId, ct);
         if (!slaPolicyExists)
             return Result.Failure(Error.NotFound<SlaPolicy>(request.SlaPolicyId));
@@ -127,8 +127,8 @@ public sealed class EscalationService : IEscalationService
         var validation = await _updateValidator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return Result.Failure(
-                Error.ValidationFailed(string.Join("; ", validation.Errors.Select(e => e.ErrorMessage))));
-
+                Error.ValidationFailed(validation.Errors.Select(e => e.ErrorMessage)));
+        
         var escalation = await _db.Escalations
             .Include(e => e.Participants)
             .Include(e => e.Comments)
