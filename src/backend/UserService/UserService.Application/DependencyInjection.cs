@@ -12,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<IUserService, UserInfoService>();
 
         services.AddValidatorsFromAssemblyContaining<RegisterUserDtoValidator>();
 
