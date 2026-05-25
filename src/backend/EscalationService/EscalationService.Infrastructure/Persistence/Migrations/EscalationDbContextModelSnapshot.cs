@@ -100,8 +100,8 @@ namespace EscalationService.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -177,8 +177,8 @@ namespace EscalationService.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AuthorId")
-                        .HasColumnType("bigint")
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid")
                         .HasColumnName("author_id");
 
                     b.Property<DateTimeOffset?>("ClosedAt")
@@ -303,8 +303,8 @@ namespace EscalationService.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("escalation_id");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.Property<DateTimeOffset>("AssignedAt")
@@ -386,8 +386,8 @@ namespace EscalationService.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("project_id");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
                     b.Property<DateTimeOffset>("AssignedAt")
