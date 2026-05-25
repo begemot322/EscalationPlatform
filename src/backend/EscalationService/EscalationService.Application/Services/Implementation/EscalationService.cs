@@ -194,6 +194,56 @@ public sealed class EscalationService : IEscalationService
         return Result.Success();
     }
 
+    public async Task<Result<IReadOnlyList<SlaCheckItem>>> GetSlaCheckItemsAsync(CancellationToken ct)
+    {
+        // Только активные эскалации
+        var activeStatuses = new[] { EscalationStatus.New, EscalationStatus.InProgress, EscalationStatus.WaitingForResponse };
+
+        var escalations = await _db.Escalations
+            .AsNoTracking()
+            .Include(e => e.SlaPolicy)
+            .Include(e => e.Project)
+            .Include(e => e.Participants)
+            .Where(e => activeStatuses.Contains(e.Status))
+            .ToListAsync(ct);
+
+        var items = escalations.Select(e => new SlaCheckItem(
+            e.Id, e.Name, e.Project.Name, e.Priority.ToString(),
+            e.SlaPolicy.ResponseTimeMinutes, e.SlaPolicy.ResolutionTimeMinutes, e.CreatedAt,
+            e.Participants
+                .Where(p => p.Role == ParticipantRole.Assignee)
+                .Select(p => new SlaCheckParticipant(p.UserId))
+                .ToList()
+        )).ToList();
+
+        _logger.LogInformation("SLA check: {Count} active escalations returned", items.Count);
+
+        return Result<IReadOnlyList<SlaCheckItem>>.Success(items);
+    }
+
+    public async Task<Result> EscalatePriorityAsync(long id, CancellationToken ct)
+    {
+        var escalation = await _db.Escalations.FirstOrDefaultAsync(e => e.Id == id, ct);
+        if (escalation is null)
+            return Result.Failure(Error.NotFound<Escalation>(id));
+
+        // Повышаем приоритет на один левел, но blocker и так максимальный поэтому его смысла нет повышать
+        if (escalation.Priority < EscalationPriority.Blocker)
+        {
+            var oldPriority = escalation.Priority;
+            escalation.Priority += 1;
+            await _db.SaveChangesAsync(ct);
+
+            _logger.LogInformation(
+                "Escalation {Id} priority escalated: {Old} => {New} (SLA breach)",
+                id, oldPriority, escalation.Priority);
+        }
+        else
+            _logger.LogInformation("Escalation {Id} already at max priority (Blocker), skipping escalation", id);
+        
+        return Result.Success();
+    }
+
     /// <summary>
     /// Строим метрики при разрешении эскалации
     /// </summary>

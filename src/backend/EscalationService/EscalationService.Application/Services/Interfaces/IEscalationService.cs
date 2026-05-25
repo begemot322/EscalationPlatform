@@ -47,4 +47,17 @@ public interface IEscalationService
     /// <param name="id">Идентификатор эскалации</param>
     /// <param name="ct">Токен отмены операции</param>
     Task<Result> DeleteAsync(long id, CancellationToken ct);
+
+    /// <summary>
+    /// ВНУТРЕННИЙ ЭНДПОИНТ.
+    /// Возвращает активные эскалации с данными SLA для мониторинга.
+    /// </summary>
+    Task<Result<IReadOnlyList<SlaCheckItem>>> GetSlaCheckItemsAsync(CancellationToken ct);
+
+    /// <summary>
+    /// ВНУТРЕННИЙ ЭНДПОИНТ.
+    /// Повышает приоритет эскалации на одну ступень.
+    /// </summary>
+    Task<Result> EscalatePriorityAsync(long id, CancellationToken ct);
+
 }
