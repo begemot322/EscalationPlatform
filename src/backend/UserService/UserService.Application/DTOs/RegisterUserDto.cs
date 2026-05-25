@@ -9,4 +9,5 @@ public record RegisterUserDto(
     string Email,
     string Password,
     string ConfirmPassword,
-    UserRole Role);
+    UserRole Role,
+    WorkType WorkType);

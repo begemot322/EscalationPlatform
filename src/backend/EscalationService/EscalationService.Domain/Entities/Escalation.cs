@@ -52,7 +52,7 @@ public sealed class Escalation : BaseEntity
     /// Идентификатор автора эскалации.
     /// Ссылается на пользователя во внешнем сервисе аутентификации.
     /// </summary>
-    public long AuthorId { get; set; }
+    public Guid AuthorId { get; set; }
     
     /// <summary>
     /// Идентификатор политики SLA, применяемой к эскалации.

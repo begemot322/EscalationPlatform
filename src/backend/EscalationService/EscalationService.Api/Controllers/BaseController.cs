@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace EscalationService.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
 public abstract class BaseController : ControllerBase
 {
     protected IActionResult OkOrError<T>(Result<T> result) =>

@@ -11,7 +11,7 @@ public sealed class EscalationParticipant
     /// <summary>
     /// Идентификатор пользователя из внешнего сервиса.
     /// </summary>
-    public long UserId { get; set; }
+    public Guid UserId { get; set; }
     
     /// <summary>
     /// Идентификатор эскалации.

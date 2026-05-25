@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EscalationService.Api.Controllers;
 
+[Route("api/v1/escalation")]
 public sealed class EscalationController : BaseController
 {
     private readonly IEscalationService _escalationService;

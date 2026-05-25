@@ -17,9 +17,6 @@ public sealed class CreateEscalationValidator : AbstractValidator<CreateEscalati
         RuleFor(x => x.ProjectId)
             .GreaterThan(0).WithMessage("ProjectId must be a valid identifier.");
 
-        RuleFor(x => x.AuthorId)
-            .GreaterThan(0).WithMessage("AuthorId must be a valid identifier.");
-
         RuleFor(x => x.Priority)
             .IsInEnum().WithMessage("Priority has an invalid value.");
 

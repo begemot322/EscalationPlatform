@@ -9,6 +9,6 @@ namespace EscalationService.Application.DTOs.Escalation;
 /// <param name="Role">Роль участника в эскалации</param>
 /// <param name="AssignedAt">Дата и время назначения участника</param>
 public sealed record EscalationParticipantResponse(
-    long UserId,
+    Guid UserId,
     ParticipantRole Role,
     DateTimeOffset AssignedAt);

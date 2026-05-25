@@ -7,4 +7,4 @@ namespace EscalationService.Application.DTOs.Project;
 /// </summary>
 /// <param name="UserId">ID пользователя</param>
 /// <param name="Role">Роль в проекте</param>
-public sealed record AddProjectOwnerRequest(long UserId, ProjectRole Role);
+public sealed record AddProjectOwnerRequest(Guid UserId, ProjectRole Role);

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EscalationService.Api.Controllers;
 
 [Authorize]
+[Route("api/v1/project")]
 public sealed class ProjectController : BaseController
 {
     private readonly IProjectService _projectService;

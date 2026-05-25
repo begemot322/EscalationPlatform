@@ -22,7 +22,7 @@ public sealed class ProjectOwner
     /// <summary>
     /// Идентификатор пользователя.
     /// </summary>
-    public long UserId { get; set; }
+    public Guid UserId { get; set; }
     
     /// <summary>
     /// Роль пользователя в проекте.

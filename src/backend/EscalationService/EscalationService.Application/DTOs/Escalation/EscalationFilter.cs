@@ -9,8 +9,8 @@ public sealed record EscalationFilter(
     EscalationStatus? Status,
     EscalationPriority? Priority,
     EscalationType? Type,
-    long? AuthorId,
+    Guid? AuthorId,
     long? ProjectId,
-    long? ResponsibleUserId,
+    Guid? ResponsibleUserId,
     DateTimeOffset? CreatedAfter,
     DateTimeOffset? CreatedBefore);

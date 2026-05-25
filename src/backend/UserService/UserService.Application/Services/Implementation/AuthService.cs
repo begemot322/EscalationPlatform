@@ -51,6 +51,7 @@ public sealed class AuthService : IAuthService
             Email = dto.Email,
             PasswordHash = _passwordHasher.Hash(dto.Password),
             Role = dto.Role,
+            WorkType = dto.WorkType,
             IsEmailVerified = false,
             CreatedAt = DateTime.UtcNow
         };

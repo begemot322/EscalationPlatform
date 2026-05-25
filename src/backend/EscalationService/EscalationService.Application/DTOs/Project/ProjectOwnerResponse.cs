@@ -9,6 +9,6 @@ namespace EscalationService.Application.DTOs.Project;
 /// <param name="Role">Роль пользователя в проекте</param>
 /// <param name="AssignedAt">Дата и время назначения владельцем</param>
 public sealed record ProjectOwnerResponse(
-    long UserId,
+    Guid UserId,
     ProjectRole Role,
     DateTimeOffset AssignedAt);

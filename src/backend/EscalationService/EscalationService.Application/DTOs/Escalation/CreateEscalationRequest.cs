@@ -19,7 +19,7 @@ public sealed record CreateEscalationRequest(
     string? Description,
     EscalationPriority Priority,
     EscalationType Type,
-    long AuthorId,
+    Guid AuthorId,
     long SlaPolicyId,
     long ProjectId,
     IReadOnlyList<EscalationParticipantRequest>? Participants,

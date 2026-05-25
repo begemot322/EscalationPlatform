@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EscalationService.Api.Controllers;
 
+[Route("api/v1/sla-policy")]
 public sealed class SlaPolicyController : BaseController
 {
     private readonly ISlaPolicyService _slaPolicyService;

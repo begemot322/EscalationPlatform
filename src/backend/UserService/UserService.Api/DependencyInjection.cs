@@ -3,6 +3,7 @@ using EscalationPlatform.OpenTelemetry;
 using EscalationPlatform.Shared.Messages;
 using Microsoft.EntityFrameworkCore;
 using UserService.Application;
+using UserService.Application.Common.Interfaces.Identity;
 using UserService.Infrastructure;
 using UserService.Infrastructure.Persistence;
 
@@ -58,9 +59,11 @@ public static class DependencyInjection
     {
         await using var scope = app.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
         await db.Database.MigrateAsync();
         logger.LogInformation("UserService database migrated successfully");
+        await DataSeeder.SeedAsync(db, hasher, logger);
     }
 }

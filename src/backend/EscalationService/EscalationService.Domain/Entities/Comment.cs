@@ -28,7 +28,7 @@ public sealed class Comment : BaseEntity
     /// Идентификатор пользователя, оставившего комментарий.
     /// Ссылается на внешний сервис.
     /// </summary>
-    public long UserId { get; set; }
+    public Guid UserId { get; set; }
 
     /// <summary>
     /// Идентификатор эскалации, к которой относится комментарий.

@@ -12,7 +12,7 @@ public sealed record EscalationResponse(
     EscalationStatus Status,
     EscalationPriority Priority,
     EscalationType Type,
-    long AuthorId,
+    Guid AuthorId,
     long SlaPolicyId,
     string SlaPolicyName,
     long ProjectId,
