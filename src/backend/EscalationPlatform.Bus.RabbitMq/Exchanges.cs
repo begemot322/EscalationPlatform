@@ -9,4 +9,10 @@ public static class Exchanges
     /// Запрос на отправку OTP-кода на email пользователя.
     /// </summary>
     public const string UserEmailOtpRequested = "user.email_otp.requested";
+
+    /// <summary>
+    /// Событие нарушения SLA по эскалации.
+    /// </summary>
+    public const string EscalationSlaBreached = "escalation.sla.breached";
+
 }
