@@ -1,3 +1,4 @@
+using EscalationPlatform.Shared.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Common.Interfaces.Identity;
@@ -21,6 +22,13 @@ public class UserController : BaseController
     public async Task<IActionResult> GetMe(CancellationToken ct)
     {
         var result = await _userService.GetCurrentAsync(_userContext.UserId, ct);
+        return OkOrError(result);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll([FromQuery] PageParams? pageParams, CancellationToken ct)
+    {
+        var result = await _userService.GetAllAsync(pageParams, ct);
         return OkOrError(result);
     }
 

@@ -1,3 +1,4 @@
+using EscalationPlatform.Shared.Pagination;
 using EscalationPlatform.Shared.Result;
 using Microsoft.EntityFrameworkCore;
 using UserService.Application.Common.Interfaces;
@@ -29,6 +30,18 @@ public sealed class UserInfoService : IUserService
             return Result<UserResponse>.Failure(Error.NotFound<User>(id));
 
         return Result<UserResponse>.Success(MapToResponse(user));
+    }
+
+    public async Task<Result<PagedResult<UserResponse>>> GetAllAsync(PageParams? pageParams, CancellationToken ct)
+    {
+        var query = _db.Users.AsNoTracking().OrderBy(u => u.LastName).ThenBy(u => u.FirstName);
+        var page = await query.ToPageAsync(pageParams, ct);
+
+        var result = new PagedResult<UserResponse>(
+            page.Items.Select(MapToResponse).ToList(),
+            page.TotalCount, page.Page, page.PageSize);
+
+        return Result<PagedResult<UserResponse>>.Success(result);
     }
 
     private static UserResponse MapToResponse(User user) => new(
