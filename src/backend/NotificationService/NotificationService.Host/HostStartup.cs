@@ -38,12 +38,17 @@ public static class HostStartup
                         configureConsumers: mt =>
                         {
                             mt.AddConsumer<OtpCodeRequestedConsumer>();
+                            mt.AddConsumer<SlaBreachedConsumer>();
                         },
                         configureRabbit: (context, cfg, config) =>
                         {
                             cfg.ConfigureConsumer<OtpCodeRequestedConsumer>(
                                 context, 
                                 exchangeName: Exchanges.UserEmailOtpRequested, 
+                                config);
+                            cfg.ConfigureConsumer<SlaBreachedConsumer>(
+                                context,
+                                exchangeName: Exchanges.EscalationSlaBreached,
                                 config);
                         });
                 
