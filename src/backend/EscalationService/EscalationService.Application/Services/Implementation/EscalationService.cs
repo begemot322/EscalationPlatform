@@ -3,6 +3,7 @@ using EscalationPlatform.Shared.Result;
 using EscalationService.Application.Common;
 using EscalationService.Application.Common.Interfaces;
 using EscalationService.Application.DTOs.Escalation;
+using EscalationService.Application.DTOs.Project;
 using EscalationService.Application.Extensions;
 using EscalationService.Application.Services.Interfaces;
 using EscalationService.Domain.Entities;
@@ -242,6 +243,68 @@ public sealed class EscalationService : IEscalationService
             _logger.LogInformation("Escalation {Id} already at max priority (Blocker), skipping escalation", id);
         
         return Result.Success();
+    }
+
+    public async Task<Result<IReadOnlyList<ProjectMonthlyStats>>> GetMonthlyStatsAsync(
+        int year, int month, CancellationToken ct)
+    {
+        var from = new DateTimeOffset(year, month, 1, 0, 0, 0, TimeSpan.Zero);
+        var to = from.AddMonths(1);
+        var now = DateTimeOffset.UtcNow;
+
+        var escalations = await _db.Escalations
+            .AsNoTracking()
+            .Include(e => e.SlaPolicy)
+            .Include(e => e.Project)
+                .ThenInclude(p => p.Owners)
+            .Where(e => e.CreatedAt >= from && e.CreatedAt < to)
+            .ToListAsync(ct);
+
+        var stats = escalations
+            .GroupBy(e => e.Project)
+            .Select(g =>
+            {
+                var project = g.Key;
+                var items = g.ToList();
+
+                var byStatus = items
+                    .GroupBy(e => e.Status.ToString())
+                    .ToDictionary(x => x.Key, x => x.Count());
+
+                var byPriority = items
+                    .GroupBy(e => e.Priority.ToString())
+                    .ToDictionary(x => x.Key, x => x.Count());
+
+                // Нарушение SLA: прошедшее время превышает лимит резолюции
+                var slaBreaches = items.Count(e =>
+                {
+                    var elapsed = ((e.ResolvedAt ?? e.ClosedAt ?? now) - e.CreatedAt).TotalMinutes;
+                    return elapsed > e.SlaPolicy.ResolutionTimeMinutes;
+                });
+
+                // Среднее время - только по тем, что уже решены
+                var resolved = items.Where(e => e.ResolvedAt.HasValue).ToList();
+                var avgHours = resolved.Count > 0
+                    ? Math.Round(resolved.Average(e => (e.ResolvedAt!.Value - e.CreatedAt).TotalHours), 1)
+                    : 0.0;
+
+                var ownerIds = project.Owners
+                    .Where(o => o.Role == ProjectRole.Owner)
+                    .Select(o => o.UserId)
+                    .ToList();
+
+                return new ProjectMonthlyStats(
+                    project.Id, project.Name, year, month,
+                    items.Count, byStatus, byPriority,
+                    slaBreaches, avgHours, ownerIds);
+            })
+            .ToList();
+
+        _logger.LogInformation(
+            "Monthly stats {Year}-{Month:D2}: {Count} projects",
+            year, month, stats.Count);
+
+        return Result<IReadOnlyList<ProjectMonthlyStats>>.Success(stats);
     }
 
     /// <summary>

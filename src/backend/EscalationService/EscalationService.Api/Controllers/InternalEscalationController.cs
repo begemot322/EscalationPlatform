@@ -37,4 +37,17 @@ public sealed class InternalEscalationController : BaseController
         return NoContentOrError(result);
     }
 
+    /// <summary>
+    /// Возвращает месячную статистику по всем проектам для формирования отчетов.
+    /// </summary>
+    [HttpGet("monthly-stats")]
+    public async Task<IActionResult> GetMonthlyStats(
+        [FromQuery] int year,
+        [FromQuery] int month,
+        CancellationToken ct)
+    {
+        var result = await _escalationService.GetMonthlyStatsAsync(year, month, ct);
+        return OkOrError(result);
+    }
+
 }

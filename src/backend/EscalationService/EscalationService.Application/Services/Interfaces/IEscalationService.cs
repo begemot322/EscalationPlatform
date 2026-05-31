@@ -1,6 +1,7 @@
 using EscalationPlatform.Shared.Pagination;
 using EscalationPlatform.Shared.Result;
 using EscalationService.Application.DTOs.Escalation;
+using EscalationService.Application.DTOs.Project;
 
 namespace EscalationService.Application.Services.Interfaces;
 
@@ -59,5 +60,12 @@ public interface IEscalationService
     /// Повышает приоритет эскалации на одну ступень.
     /// </summary>
     Task<Result> EscalatePriorityAsync(long id, CancellationToken ct);
+
+    /// <summary>
+    /// ВНУТРЕННИЙ ЭНДПОИНТ.
+    /// Возвращает статистику по всем проектам за указанный месяц.
+    /// Используется SchedulerService для формирования ежемесячных отчетов.
+    /// </summary>
+    Task<Result<IReadOnlyList<ProjectMonthlyStats>>> GetMonthlyStatsAsync(int year, int month, CancellationToken ct);
 
 }
