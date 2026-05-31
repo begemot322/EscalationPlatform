@@ -223,8 +223,11 @@ public sealed class EscalationService : IEscalationService
         if (string.IsNullOrWhiteSpace(request.Text))
             return Result.Failure(Error.ValidationFailed(["Comment text cannot be empty."]));
 
-        var exists = await _db.Escalations.AnyAsync(e => e.Id == escalationId, ct);
-        if (!exists)
+        var escalation = await _db.Escalations
+            .Include(e => e.Comments)
+            .FirstOrDefaultAsync(e => e.Id == escalationId, ct);
+
+        if (escalation is null)
             return Result.Failure(Error.NotFound<Escalation>(escalationId));
 
         var comment = new Comment
@@ -237,6 +240,18 @@ public sealed class EscalationService : IEscalationService
         };
 
         _db.Comments.Add(comment);
+
+        // Первый комментарий от не-автора фиксирует время первого ответа
+        if (escalation.FirstResponseAt is null
+            && request.AuthorId != escalation.AuthorId
+            && escalation.Comments.All(c => c.IsSystem))
+        {
+            escalation.FirstResponseAt = DateTimeOffset.UtcNow;
+            _logger.LogInformation(
+                "FirstResponseAt set for Escalation {EscalationId} by {UserId}",
+                escalationId, request.AuthorId);
+        }
+
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("Comment added to Escalation {EscalationId} by {UserId}", escalationId, request.AuthorId);
