@@ -34,6 +34,7 @@ public static class DependencyInjection
             configureRabbit: (_, cfg, config) =>
             {
                 cfg.ConfigureMessage<SlaBreached>(Exchanges.EscalationSlaBreached, config);
+                cfg.ConfigureMessage<MonthlyReportRequested>(Exchanges.EscalationMonthlyReport, config);
             });
 
         // Telemetry + Logging
@@ -45,6 +46,7 @@ public static class DependencyInjection
 
         // BackgroundServices
         builder.Services.AddHostedService<SlaMonitorWorker>();
+        builder.Services.AddHostedService<MonthlyReportWorker>();
 
         return builder;
     }
