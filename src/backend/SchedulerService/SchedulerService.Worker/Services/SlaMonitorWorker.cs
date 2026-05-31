@@ -50,6 +50,12 @@ public sealed class SlaMonitorWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if (!_options.SlaMonitorEnabled)
+        {
+            _logger.LogInformation("SlaMonitorWorker is disabled via configuration (Scheduler:SlaMonitorEnabled)");
+            return;
+        }
+
         _logger.LogInformation("SlaMonitorWorker started. Interval: {Interval} min",
             _options.CheckIntervalMinutes);
 

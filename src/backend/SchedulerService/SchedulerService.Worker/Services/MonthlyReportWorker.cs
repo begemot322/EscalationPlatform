@@ -1,6 +1,8 @@
 using EscalationPlatform.Shared.Messages;
 using MassTransit;
+using Microsoft.Extensions.Options;
 using SchedulerService.Clients;
+using SchedulerService.Configuration;
 
 namespace SchedulerService.Services;
 
@@ -20,23 +22,49 @@ public sealed class MonthlyReportWorker : BackgroundService
     private readonly IEscalationServiceClient _escalationClient;
     private readonly IUserServiceClient _userClient;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SchedulerOptions _options;
     private readonly ILogger<MonthlyReportWorker> _logger;
 
     public MonthlyReportWorker(
         IEscalationServiceClient escalationClient,
         IUserServiceClient userClient,
         IPublishEndpoint publishEndpoint,
+        IOptions<SchedulerOptions> options,
         ILogger<MonthlyReportWorker> logger)
     {
         _escalationClient = escalationClient;
         _userClient = userClient;
         _publishEndpoint = publishEndpoint;
+        _options = options.Value;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("MonthlyReportWorker started");
+        if (!_options.MonthlyReportEnabled)
+        {
+            _logger.LogInformation("MonthlyReportWorker is disabled via configuration (Scheduler:MonthlyReportEnabled)");
+            return;
+        }
+
+        _logger.LogInformation("MonthlyReportWorker started (RunImmediately={Flag})",
+            _options.MonthlyReportRunImmediately);
+
+        // При RunImmediately=true - сразу гоним отчет за текущий месяц, без ожидания
+        if (_options.MonthlyReportRunImmediately)
+        {
+            var now = DateTimeOffset.UtcNow;
+            try
+            {
+                await RunReportAsync(now.Year, now.Month, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "MonthlyReportWorker: immediate run failed for {Year}-{Month:D2}",
+                    now.Year, now.Month);
+            }
+        }
 
         while (!stoppingToken.IsCancellationRequested)
         {
