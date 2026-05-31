@@ -50,6 +50,11 @@ public interface IEscalationService
     Task<Result> DeleteAsync(long id, CancellationToken ct);
 
     /// <summary>
+    /// Добавляет пользовательский комментарий к эскалации.
+    /// </summary>
+    Task<Result> AddCommentAsync(long escalationId, CreateCommentRequest request, CancellationToken ct);
+
+    /// <summary>
     /// ВНУТРЕННИЙ ЭНДПОИНТ.
     /// Возвращает активные эскалации с данными SLA для мониторинга.
     /// </summary>

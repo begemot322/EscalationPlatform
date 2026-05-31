@@ -49,6 +49,17 @@ public sealed class EscalationController : BaseController
         return NoContentOrError(result);
     }
 
+    [HttpPost("{id:long}/comment")]
+    [Authorize]
+    public async Task<IActionResult> AddComment(
+        [FromRoute] long id,
+        [FromBody] CreateCommentRequest request,
+        CancellationToken ct)
+    {
+        var result = await _escalationService.AddCommentAsync(id, request, ct);
+        return NoContentOrError(result);
+    }
+
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
     {

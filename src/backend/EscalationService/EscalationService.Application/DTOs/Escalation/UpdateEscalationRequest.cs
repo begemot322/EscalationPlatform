@@ -7,6 +7,8 @@ public sealed record UpdateEscalationRequest(
     string? Description,
     EscalationPriority Priority,
     EscalationStatus Status,
+    EscalationType Type,
     DateTimeOffset? FirstResponseAt,
     DateTimeOffset? ResolvedAt,
-    IReadOnlyList<EscalationParticipantRequest>? Participants);
+    IReadOnlyList<EscalationParticipantRequest>? Participants,
+    IReadOnlyList<CriterionUpdateItem>? Criteria);

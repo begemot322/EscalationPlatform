@@ -22,6 +22,7 @@ public sealed record EscalationResponse(
     DateTimeOffset? ClosedAt,
     IReadOnlyList<EscalationParticipantResponse> Participants,
     IReadOnlyList<CriterionResponse> Criteria,
+    IReadOnlyList<CommentResponse> Comments,
     EscalationMetricsResponse? Metrics,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);

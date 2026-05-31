@@ -62,6 +62,7 @@ public sealed class EscalationService : IEscalationService
             .Include(e => e.Project)
             .Include(e => e.Participants)
             .Include(e => e.Criteria)
+            .Include(e => e.Comments.OrderBy(c => c.CreatedAt))
             .Include(e => e.Metrics)
             .FirstOrDefaultAsync(e => e.Id == id, ct);
 
@@ -132,6 +133,7 @@ public sealed class EscalationService : IEscalationService
         
         var escalation = await _db.Escalations
             .Include(e => e.Participants)
+            .Include(e => e.Criteria)
             .Include(e => e.Comments)
             .Include(e => e.Metrics)
             .Include(e => e.SlaPolicy)
@@ -147,6 +149,7 @@ public sealed class EscalationService : IEscalationService
         escalation.Description = request.Description;
         escalation.Priority = request.Priority;
         escalation.Status = request.Status;
+        escalation.Type = request.Type;
         escalation.FirstResponseAt = request.FirstResponseAt;
         escalation.ResolvedAt = request.ResolvedAt;
 
@@ -161,6 +164,23 @@ public sealed class EscalationService : IEscalationService
                     Role = p.Role,
                     AssignedAt = now
                 });
+        }
+
+        if (request.Criteria is not null)
+        {
+            escalation.Criteria.Clear();
+            var now = DateTimeOffset.UtcNow;
+            for (var i = 0; i < request.Criteria.Count; i++)
+            {
+                var c = request.Criteria[i];
+                escalation.Criteria.Add(new Criterion
+                {
+                    Name = c.Name,
+                    IsCompleted = c.IsCompleted,
+                    CompletedAt = c.IsCompleted ? now : null,
+                    Order = i,
+                });
+            }
         }
 
         if (request.Status == EscalationStatus.Closed && escalation.ClosedAt is null)
@@ -192,6 +212,31 @@ public sealed class EscalationService : IEscalationService
 
         _logger.LogInformation("Deleted Escalation {Id}", id);
 
+        return Result.Success();
+    }
+
+    public async Task<Result> AddCommentAsync(long escalationId, CreateCommentRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Text))
+            return Result.Failure(Error.ValidationFailed(["Comment text cannot be empty."]));
+
+        var exists = await _db.Escalations.AnyAsync(e => e.Id == escalationId, ct);
+        if (!exists)
+            return Result.Failure(Error.NotFound<Escalation>(escalationId));
+
+        var comment = new Comment
+        {
+            Text = request.Text.Trim(),
+            IsSystem = false,
+            Type = CommentType.User,
+            UserId = request.AuthorId,
+            EscalationId = escalationId,
+        };
+
+        _db.Comments.Add(comment);
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Comment added to Escalation {EscalationId} by {UserId}", escalationId, request.AuthorId);
         return Result.Success();
     }
 
@@ -368,6 +413,7 @@ public sealed class EscalationService : IEscalationService
         e.ClosedAt,
         e.Participants.Select(p => new EscalationParticipantResponse(p.UserId, p.Role, p.AssignedAt)).ToList(),
         e.Criteria.Select(c => new CriterionResponse(c.Id, c.Name, c.IsCompleted)).ToList(),
+        e.Comments.Select(c => new CommentResponse(c.Id, c.Text, c.IsSystem, c.Type, c.UserId, c.CreatedAt)).ToList(),
         e.Metrics is null ? null : new EscalationMetricsResponse(
             e.Metrics.FirstResponseTimeMinutes,
             e.Metrics.ResolutionTimeMinutes,
