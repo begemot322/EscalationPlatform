@@ -43,4 +43,21 @@ public sealed class EscalationServiceClient : IEscalationServiceClient
                 "Failed to escalate priority for escalation {Id}: {Status}",
                 id, response.StatusCode);
     }
+
+    public async Task<IReadOnlyList<ProjectMonthlyStats>> GetMonthlyStatsAsync(
+        int year, int month, CancellationToken ct)
+    {
+        var items = await _httpClient
+            .GetFromJsonAsync<List<ProjectMonthlyStats>>(
+                $"internal/escalation/monthly-stats?year={year}&month={month}", ct);
+
+        if (items is null)
+        {
+            _logger.LogWarning(
+                "EscalationService returned null for monthly-stats {Year}-{Month:D2}", year, month);
+            return [];
+        }
+
+        return items;
+    }
 }

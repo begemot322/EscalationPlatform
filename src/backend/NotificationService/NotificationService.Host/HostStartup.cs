@@ -2,6 +2,7 @@
 using EscalationPlatform.OpenTelemetry;
 using NotificationService.Email;
 using NotificationService.Email.Consumers;
+using NotificationService.Pdf;
 
 namespace NotificationService.Host;
 
@@ -39,20 +40,26 @@ public static class HostStartup
                         {
                             mt.AddConsumer<OtpCodeRequestedConsumer>();
                             mt.AddConsumer<SlaBreachedConsumer>();
+                            mt.AddConsumer<MonthlyReportConsumer>();
                         },
                         configureRabbit: (context, cfg, config) =>
                         {
                             cfg.ConfigureConsumer<OtpCodeRequestedConsumer>(
-                                context, 
-                                exchangeName: Exchanges.UserEmailOtpRequested, 
+                                context,
+                                exchangeName: Exchanges.UserEmailOtpRequested,
                                 config);
                             cfg.ConfigureConsumer<SlaBreachedConsumer>(
                                 context,
                                 exchangeName: Exchanges.EscalationSlaBreached,
                                 config);
+                            cfg.ConfigureConsumer<MonthlyReportConsumer>(
+                                context,
+                                exchangeName: Exchanges.EscalationMonthlyReport,
+                                config);
                         });
-                
+
                 services.AddScoped<IEmailSender, MailKitSmtpService>();
+                services.AddScoped<IPdfReportService, MonthlyReportPdfService>();
             })
             .ConfigureLogging((hostContext, logging) =>
             {

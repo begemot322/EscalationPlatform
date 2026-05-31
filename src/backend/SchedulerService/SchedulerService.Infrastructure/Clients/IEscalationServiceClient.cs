@@ -15,7 +15,10 @@ public interface IEscalationServiceClient
     /// <summary>
     /// Повышает приоритет эскалации на одну ступень.
     /// </summary>
-    /// <param name="id">Идентификатор эскалации.</param>
-    /// <param name="ct">Токен отмены</param>
     Task EscalatePriorityAsync(long id, CancellationToken ct);
+
+    /// <summary>
+    /// Возвращает месячную статистику по всем проектам за указанный период.
+    /// </summary>
+    Task<IReadOnlyList<ProjectMonthlyStats>> GetMonthlyStatsAsync(int year, int month, CancellationToken ct);
 }

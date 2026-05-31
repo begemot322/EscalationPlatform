@@ -14,6 +14,7 @@
       <ProjectReference Include="..\..\EscalationPlatform.Bus.RabbitMq\EscalationPlatform.Bus.RabbitMq.csproj" />
       <ProjectReference Include="..\..\EscalationPlatform.OpenTelemetry\EscalationPlatform.OpenTelemetry.csproj" />
       <ProjectReference Include="..\NotificationService.Email\NotificationService.Email.csproj" />
+      <ProjectReference Include="..\NotificationService.Pdf\NotificationService.Pdf.csproj" />
     </ItemGroup>
 
 </Project>

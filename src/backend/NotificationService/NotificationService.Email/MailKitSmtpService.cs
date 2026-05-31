@@ -20,15 +20,35 @@ public class MailKitSmtpService : IEmailSender
         _logger = logger;
     }
 
-    public async Task SendAsync(string to, string subject, string htmlBody)
+    public Task SendAsync(string to, string subject, string htmlBody)
+        => SendCoreAsync(to, subject, htmlBody, attachment: null, attachmentFileName: null);
+
+    public Task SendWithAttachmentAsync(
+        string to,
+        string subject,
+        string htmlBody,
+        byte[] attachment,
+        string attachmentFileName)
+        => SendCoreAsync(to, subject, htmlBody, attachment, attachmentFileName);
+
+    private async Task SendCoreAsync(
+        string to,
+        string subject,
+        string htmlBody,
+        byte[]? attachment,
+        string? attachmentFileName)
     {
         var message = new MimeMessage();
-        
+
         message.From.Add(new MailboxAddress(_options.FromName, _options.FromEmail));
         message.To.Add(MailboxAddress.Parse(to));
         message.Subject = subject;
 
         var builder = new BodyBuilder { HtmlBody = htmlBody };
+
+        if (attachment is not null && attachmentFileName is not null)
+            builder.Attachments.Add(attachmentFileName, attachment);
+
         message.Body = builder.ToMessageBody();
 
         using var client = new SmtpClient();
