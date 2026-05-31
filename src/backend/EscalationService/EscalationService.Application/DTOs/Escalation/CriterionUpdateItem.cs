@@ -5,5 +5,6 @@ namespace EscalationService.Application.DTOs.Escalation;
 /// Если список Criteria передан — заменяет текущий набор критериев целиком.
 /// </summary>
 /// <param name="Name">Название критерия</param>
+/// <param name="Description">Описание критерия (необязательно)</param>
 /// <param name="IsCompleted">Флаг выполнения</param>
-public sealed record CriterionUpdateItem(string Name, bool IsCompleted);
+public sealed record CriterionUpdateItem(string Name, string? Description, bool IsCompleted);

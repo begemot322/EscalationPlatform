@@ -4,4 +4,5 @@ namespace EscalationService.Application.DTOs.Escalation;
 /// Запрос на создание критерия выполнения эскалации
 /// </summary>
 /// <param name="Name">Название критерия</param>
-public sealed record CriterionRequest(string Name);
+/// <param name="Description">Описание критерия (необязательно)</param>
+public sealed record CriterionRequest(string Name, string? Description);

@@ -5,5 +5,6 @@ namespace EscalationService.Application.DTOs.Escalation;
 /// </summary>
 /// <param name="Id">Идентификатор критерия</param>
 /// <param name="Name">Название критерия</param>
+/// <param name="Description">Описание критерия</param>
 /// <param name="IsCompleted">Статус выполнения критерия</param>
-public sealed record CriterionResponse(long Id, string Name, bool IsCompleted);
+public sealed record CriterionResponse(long Id, string Name, string? Description, bool IsCompleted);

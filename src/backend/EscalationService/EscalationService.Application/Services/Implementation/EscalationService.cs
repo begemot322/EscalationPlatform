@@ -108,10 +108,12 @@ public sealed class EscalationService : IEscalationService
                 Role = p.Role,
                 AssignedAt = now
             }).ToList() ?? [],
-            Criteria = request.Criteria?.Select(c => new Criterion
+            Criteria = request.Criteria?.Select((c, i) => new Criterion
             {
                 Name = c.Name,
-                IsCompleted = false
+                Description = c.Description,
+                IsCompleted = false,
+                Order = i,
             }).ToList() ?? []
         };
 
@@ -176,6 +178,7 @@ public sealed class EscalationService : IEscalationService
                 escalation.Criteria.Add(new Criterion
                 {
                     Name = c.Name,
+                    Description = c.Description,
                     IsCompleted = c.IsCompleted,
                     CompletedAt = c.IsCompleted ? now : null,
                     Order = i,
@@ -412,7 +415,7 @@ public sealed class EscalationService : IEscalationService
         e.ResolvedAt,
         e.ClosedAt,
         e.Participants.Select(p => new EscalationParticipantResponse(p.UserId, p.Role, p.AssignedAt)).ToList(),
-        e.Criteria.Select(c => new CriterionResponse(c.Id, c.Name, c.IsCompleted)).ToList(),
+        e.Criteria.Select(c => new CriterionResponse(c.Id, c.Name, c.Description, c.IsCompleted)).ToList(),
         e.Comments.Select(c => new CommentResponse(c.Id, c.Text, c.IsSystem, c.Type, c.UserId, c.CreatedAt)).ToList(),
         e.Metrics is null ? null : new EscalationMetricsResponse(
             e.Metrics.FirstResponseTimeMinutes,
