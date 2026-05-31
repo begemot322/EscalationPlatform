@@ -30,7 +30,12 @@ public static class EscalationExtensions
             query = query.Where(e => e.ProjectId == filter.ProjectId.Value);
 
         if (filter.ResponsibleUserId.HasValue)
-            query = query.Where(e => e.Participants.Any(p => p.UserId == filter.ResponsibleUserId.Value));
+            query = filter.ResponsibleUserRole.HasValue
+                ? query.Where(e => e.Participants.Any(p =>
+                    p.UserId == filter.ResponsibleUserId.Value &&
+                    p.Role == filter.ResponsibleUserRole.Value))
+                : query.Where(e => e.Participants.Any(p =>
+                    p.UserId == filter.ResponsibleUserId.Value));
 
         if (filter.CreatedAfter.HasValue)
             query = query.Where(e => e.CreatedAt >= filter.CreatedAfter.Value);

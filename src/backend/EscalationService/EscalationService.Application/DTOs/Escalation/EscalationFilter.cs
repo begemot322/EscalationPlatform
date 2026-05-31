@@ -12,5 +12,6 @@ public sealed record EscalationFilter(
     Guid? AuthorId,
     long? ProjectId,
     Guid? ResponsibleUserId,
+    ParticipantRole? ResponsibleUserRole,
     DateTimeOffset? CreatedAfter,
     DateTimeOffset? CreatedBefore);
