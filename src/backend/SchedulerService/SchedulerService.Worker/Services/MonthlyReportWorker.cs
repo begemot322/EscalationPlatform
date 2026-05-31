@@ -49,6 +49,10 @@ public sealed class MonthlyReportWorker : BackgroundService
 
         _logger.LogInformation("MonthlyReportWorker started (RunImmediately={Flag})",
             _options.MonthlyReportRunImmediately);
+        
+        // Задержка на всякий случай, если другие сервисы не поднялись (хотя в докере можно в композе настроить и так,
+        // но на всякий сделаю (при локальной разработке и так запускаю все сразу)
+        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
 
         // При RunImmediately=true - сразу гоним отчет за текущий месяц, без ожидания
         if (_options.MonthlyReportRunImmediately)
