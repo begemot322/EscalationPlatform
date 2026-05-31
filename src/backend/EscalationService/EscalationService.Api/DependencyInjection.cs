@@ -1,4 +1,6 @@
-﻿using EscalationPlatform.OpenTelemetry;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using EscalationPlatform.OpenTelemetry;
 using EscalationService.Application;
 using EscalationService.Infrastructure;
 using EscalationService.Infrastructure.Persistence;
@@ -26,7 +28,13 @@ public static class DependencyInjection
         
         Console.WriteLine($"Starting {ServiceName}:{version}\n");
         
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                // Сериализуем/десериализуем enums как snake_case-строки
+                options.JsonSerializerOptions.Converters.Add(
+                    new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
+            });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
