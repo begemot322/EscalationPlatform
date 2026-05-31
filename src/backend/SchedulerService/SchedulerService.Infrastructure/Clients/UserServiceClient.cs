@@ -22,7 +22,7 @@ public sealed class UserServiceClient : IUserServiceClient
     public async Task<UserProfile?> GetUserProfileAsync(Guid userId, CancellationToken ct)
     {
         var response = await _httpClient
-            .GetAsync($"api/v1/user/{userId}", ct);
+            .GetAsync($"internal/user/{userId}", ct);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {

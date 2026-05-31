@@ -3,7 +3,7 @@ using EscalationService.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace EscalationService.Infrastructure.Persistence;
+namespace EscalationService.Infrastructure.Persistence.DataSeeders;
 
 public static class DataSeeder
 {

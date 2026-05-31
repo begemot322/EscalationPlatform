@@ -2,6 +2,7 @@
 using EscalationService.Application;
 using EscalationService.Infrastructure;
 using EscalationService.Infrastructure.Persistence;
+using EscalationService.Infrastructure.Persistence.DataSeeders;
 using Microsoft.EntityFrameworkCore;
 
 namespace EscalationService.Api;
@@ -51,5 +52,6 @@ public static class DependencyInjection
         await db.Database.MigrateAsync();
         logger.LogInformation("Database migrated successfully");
         await DataSeeder.SeedAsync(db, logger);
+        await SlaMonitorTestSeeder.SeedAsync(db, logger);
     }
 }
