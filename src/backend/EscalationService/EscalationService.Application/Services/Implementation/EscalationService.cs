@@ -324,10 +324,10 @@ public sealed class EscalationService : IEscalationService
             .ToListAsync(ct);
 
         var stats = escalations
-            .GroupBy(e => e.Project)
+            .GroupBy(e => e.ProjectId)
             .Select(g =>
             {
-                var project = g.Key;
+                var project = g.First().Project;
                 var items = g.ToList();
 
                 var byStatus = items
@@ -368,6 +368,65 @@ public sealed class EscalationService : IEscalationService
             year, month, stats.Count);
 
         return Result<IReadOnlyList<ProjectMonthlyStats>>.Success(stats);
+    }
+
+    public async Task<Result<IReadOnlyList<UserStatsItem>>> GetUsersStatsAsync(CancellationToken ct)
+    {
+        var activeStatuses = new[]
+            { EscalationStatus.New, EscalationStatus.InProgress, EscalationStatus.WaitingForResponse };
+
+        // Один запрос — все эскалации с участниками и метриками
+        var escalations = await _db.Escalations
+            .AsNoTracking()
+            .Include(e => e.Participants)
+            .Include(e => e.Metrics)
+            .ToListAsync(ct);
+
+        // Группируем по исполнителям
+        var byUser = escalations
+            .SelectMany(e => e.Participants
+                .Where(p => p.Role == ParticipantRole.Assignee)
+                .Select(p => new { p.UserId, Esc = e }))
+            .GroupBy(x => x.UserId)
+            .ToList();
+
+        var result = byUser.Select(group =>
+        {
+            var userId  = group.Key;
+            var items   = group.Select(x => x.Esc).ToList();
+            var total   = items.Count;
+
+            var active    = items.Count(e => activeStatuses.Contains(e.Status));
+            var closed    = items.Count(e => e.Status is EscalationStatus.Resolved or EscalationStatus.Closed);
+            var cancelled = items.Count(e => e.Status == EscalationStatus.Cancelled);
+
+            var metrics           = items.Where(e => e.Metrics is not null).Select(e => e.Metrics!).ToList();
+            var closedWithMetrics = metrics.Count;
+
+            double? avgFirstResponse = closedWithMetrics > 0
+                ? Math.Round(metrics.Average(m => (double)m.FirstResponseTimeMinutes), 1) : null;
+            double? avgResolution = closedWithMetrics > 0
+                ? Math.Round(metrics.Average(m => (double)m.ResolutionTimeMinutes), 1) : null;
+
+            var slaViolated  = metrics.Count(m => m.SlaViolated);
+            var slaCompliant = metrics.Count(m => !m.SlaViolated);
+
+            var effective        = Math.Max(total - cancelled, 1);
+            var completionRate   = (double)closed / effective;
+            var completionPercent = (int)Math.Round(completionRate * 100);
+
+            // Efficiency: 50% закрытие + 50% SLA (если метрик нет — только закрытие)
+            var slaRate = closedWithMetrics > 0 ? (double)slaCompliant / closedWithMetrics : completionRate;
+            var efficiencyScore = (int)Math.Round((completionRate * 0.5 + slaRate * 0.5) * 100);
+
+            return new UserStatsItem(
+                userId, total, active, closed, cancelled,
+                closedWithMetrics, avgFirstResponse, avgResolution,
+                slaViolated, slaCompliant, completionPercent, efficiencyScore);
+        }).ToList();
+
+        _logger.LogInformation("UsersStats: {Count} assignees computed", result.Count);
+        return Result<IReadOnlyList<UserStatsItem>>.Success(result);
     }
 
     /// <summary>

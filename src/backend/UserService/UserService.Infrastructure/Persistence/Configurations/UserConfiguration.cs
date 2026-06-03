@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using UserService.Domain;
 using UserService.Domain.Entities;
 using UserService.Domain.Enums;
 using UserService.Infrastructure.Persistence.Converters;

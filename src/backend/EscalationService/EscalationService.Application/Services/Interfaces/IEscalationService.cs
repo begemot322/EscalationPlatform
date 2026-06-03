@@ -73,4 +73,10 @@ public interface IEscalationService
     /// </summary>
     Task<Result<IReadOnlyList<ProjectMonthlyStats>>> GetMonthlyStatsAsync(int year, int month, CancellationToken ct);
 
+    /// <summary>
+    /// Возвращает статистику по всем исполнителям.
+    /// Используется менеджерами и администраторами.
+    /// </summary>
+    Task<Result<IReadOnlyList<UserStatsItem>>> GetUsersStatsAsync(CancellationToken ct);
+
 }

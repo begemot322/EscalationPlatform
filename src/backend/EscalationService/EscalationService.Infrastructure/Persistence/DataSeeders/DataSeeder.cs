@@ -214,25 +214,6 @@ public static class DataSeeder
                     new EscalationParticipant { UserId = U4, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-10) },
                 ]
             },
-            new()
-            {
-                Name = "Оптимизация индексов в таблице escalations",
-                Description = "Запросы с фильтрацией по статусу и проекту выполняются медленно (>500ms) на объёме >1M записей.",
-                Status = EscalationStatus.Resolved,
-                Priority = EscalationPriority.Medium,
-                Type = EscalationType.Incident,
-                AuthorId = U1,
-                SlaPolicyId = slaStandard.Id,
-                ProjectId = core.Id,
-                ResolvedAt = now.AddDays(-5),
-                CreatedAt = now.AddDays(-14),
-                UpdatedAt = now.AddDays(-5),
-                Participants =
-                [
-                    new EscalationParticipant { UserId = U3, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-14) },
-                ]
-            },
-
             // MOB — 3 эскалации
             new()
             {
@@ -275,6 +256,7 @@ public static class DataSeeder
                 AuthorId = U5,
                 SlaPolicyId = slaStandard.Id,
                 ProjectId = mob.Id,
+                FirstResponseAt = now.AddDays(-17),
                 ResolvedAt = now.AddDays(-10),
                 ClosedAt = now.AddDays(-8),
                 CreatedAt = now.AddDays(-18),
@@ -282,7 +264,16 @@ public static class DataSeeder
                 Participants =
                 [
                     new EscalationParticipant { UserId = U4, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-18) },
-                ]
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 60,   // 1 ч — хорошо (SLA 120 мин)
+                    ResolutionTimeMinutes    = 11520, // 8 дней
+                    TimeToCloseMinutes       = 14400, // 10 дней
+                    SlaViolated = false,
+                    TotalComments = 5,
+                    TotalParticipants = 1,
+                }
             },
 
             // API — 3 эскалации
@@ -371,6 +362,312 @@ public static class DataSeeder
                 [
                     new EscalationParticipant { UserId = U4, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-9) },
                 ]
+            },
+
+            // CORE — закрытые с метриками
+            new()
+            {
+                Name = "Оптимизация индексов в таблице escalations",
+                Description = "Запросы с фильтрацией по статусу и проекту выполняются медленно (>500ms) на объёме >1M записей.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Medium,
+                Type = EscalationType.Incident,
+                AuthorId = U1,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = core.Id,
+                FirstResponseAt = now.AddDays(-13).AddHours(3),
+                ResolvedAt = now.AddDays(-5),
+                ClosedAt = now.AddDays(-4),
+                CreatedAt = now.AddDays(-14),
+                UpdatedAt = now.AddDays(-4),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U3, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-14) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 180,  // 3 ч — в SLA (120 мин Standard — чуть превышено)
+                    ResolutionTimeMinutes    = 12960, // 9 дней
+                    TimeToCloseMinutes       = 14400, // 10 дней
+                    SlaViolated = true,               // ответ чуть позже нормы
+                    TotalComments = 8,
+                    TotalParticipants = 1,
+                }
+            },
+            new()
+            {
+                Name = "Утечка памяти в notification worker",
+                Description = "Worker постепенно съедает память и перезапускается раз в 6 часов. RSS растёт линейно.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.High,
+                Type = EscalationType.Bug,
+                AuthorId = U2,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = core.Id,
+                FirstResponseAt = now.AddDays(-21).AddMinutes(45),
+                ResolvedAt = now.AddDays(-19),
+                ClosedAt = now.AddDays(-18),
+                CreatedAt = now.AddDays(-22),
+                UpdatedAt = now.AddDays(-18),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U3, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-22) },
+                    new EscalationParticipant { UserId = U1, Role = ParticipantRole.Observer,  AssignedAt = now.AddDays(-22) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 45,   // 45 мин — отлично
+                    ResolutionTimeMinutes    = 4320, // 3 дня
+                    TimeToCloseMinutes       = 5760, // 4 дня
+                    SlaViolated = false,
+                    TotalComments = 12,
+                    TotalParticipants = 2,
+                }
+            },
+
+            // MOB — закрытые с метриками
+            new()
+            {
+                Name = "Crash при повороте экрана в чате",
+                Description = "IllegalStateException в ChatFragment при смене ориентации. Воспроизводится на Android 12+.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.High,
+                Type = EscalationType.Bug,
+                AuthorId = U5,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = mob.Id,
+                FirstResponseAt = now.AddDays(-29).AddMinutes(30),
+                ResolvedAt = now.AddDays(-26),
+                ClosedAt = now.AddDays(-25),
+                CreatedAt = now.AddDays(-30),
+                UpdatedAt = now.AddDays(-25),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U4, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-30) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 30,   // 30 мин — отлично
+                    ResolutionTimeMinutes    = 5760, // 4 дня
+                    TimeToCloseMinutes       = 7200, // 5 дней
+                    SlaViolated = false,
+                    TotalComments = 6,
+                    TotalParticipants = 1,
+                }
+            },
+            new()
+            {
+                Name = "Push-уведомления не приходят на iOS 17",
+                Description = "После обновления ОС до iOS 17 часть пользователей перестала получать push. Токены регистрируются нормально.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Critical,
+                Type = EscalationType.Incident,
+                AuthorId = U2,
+                SlaPolicyId = slaCritical.Id,
+                ProjectId = mob.Id,
+                FirstResponseAt = now.AddDays(-35).AddMinutes(50),
+                ResolvedAt = now.AddDays(-33),
+                ClosedAt = now.AddDays(-32),
+                CreatedAt = now.AddDays(-36),
+                UpdatedAt = now.AddDays(-32),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U4, Role = ParticipantRole.Assignee,  AssignedAt = now.AddDays(-36) },
+                    new EscalationParticipant { UserId = U6, Role = ParticipantRole.Assignee,  AssignedAt = now.AddDays(-36) },
+                    new EscalationParticipant { UserId = U1, Role = ParticipantRole.Observer,   AssignedAt = now.AddDays(-36) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 50,   // 50 мин — нарушение (SLA Critical = 30 мин)
+                    ResolutionTimeMinutes    = 4320, // 3 дня
+                    TimeToCloseMinutes       = 5760, // 4 дня
+                    SlaViolated = true,
+                    TotalComments = 15,
+                    TotalParticipants = 3,
+                }
+            },
+
+            // API — закрытые с метриками
+            new()
+            {
+                Name = "Некорректный 500 при пустом теле запроса",
+                Description = "POST /api/v1/escalation без тела возвращает 500 вместо 400. Нужна явная валидация.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Medium,
+                Type = EscalationType.Bug,
+                AuthorId = U4,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = api.Id,
+                FirstResponseAt = now.AddDays(-40).AddHours(1),
+                ResolvedAt = now.AddDays(-38),
+                ClosedAt = now.AddDays(-37),
+                CreatedAt = now.AddDays(-41),
+                UpdatedAt = now.AddDays(-37),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U3, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-41) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 60,   // 1 ч — в норме
+                    ResolutionTimeMinutes    = 4320, // 3 дня
+                    TimeToCloseMinutes       = 5760, // 4 дня
+                    SlaViolated = false,
+                    TotalComments = 4,
+                    TotalParticipants = 1,
+                }
+            },
+
+            // INFRA — закрытые с метриками
+            new()
+            {
+                Name = "Диск на prod-db заполнен на 95%",
+                Description = "Свободно меньше 5% — нужно срочно почистить старые WAL-логи или расширить volume.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Critical,
+                Type = EscalationType.Incident,
+                AuthorId = U1,
+                SlaPolicyId = slaCritical.Id,
+                ProjectId = infra.Id,
+                FirstResponseAt = now.AddDays(-25).AddMinutes(20),
+                ResolvedAt = now.AddDays(-25),
+                ClosedAt = now.AddDays(-24),
+                CreatedAt = now.AddDays(-26),
+                UpdatedAt = now.AddDays(-24),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U6, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-26) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 20,   // 20 мин — отлично (SLA 30 мин)
+                    ResolutionTimeMinutes    = 1200, // 20 ч
+                    TimeToCloseMinutes       = 2880, // 2 дня
+                    SlaViolated = false,
+                    TotalComments = 7,
+                    TotalParticipants = 1,
+                }
+            },
+            new()
+            {
+                Name = "CI pipeline падает на этапе docker build",
+                Description = "После обновления base image alpine:3.19 сборка падает из-за несовместимости пакетов.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.High,
+                Type = EscalationType.Bug,
+                AuthorId = U3,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = infra.Id,
+                FirstResponseAt = now.AddDays(-44).AddHours(4),
+                ResolvedAt = now.AddDays(-43),
+                ClosedAt = now.AddDays(-42),
+                CreatedAt = now.AddDays(-45),
+                UpdatedAt = now.AddDays(-42),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U6, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-45) },
+                    new EscalationParticipant { UserId = U5, Role = ParticipantRole.Observer,  AssignedAt = now.AddDays(-45) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 240,  // 4 ч — нарушение (SLA 120 мин)
+                    ResolutionTimeMinutes    = 2880, // 2 дня
+                    TimeToCloseMinutes       = 4320, // 3 дня
+                    SlaViolated = true,
+                    TotalComments = 9,
+                    TotalParticipants = 2,
+                }
+            },
+            new()
+            {
+                Name = "Сертификат TLS истекает через 7 дней",
+                Description = "Wildcard сертификат *.waveaccess.io истекает. Нужна ручная замена или настройка auto-renewal.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Blocker,
+                Type = EscalationType.ServiceRequest,
+                AuthorId = U2,
+                SlaPolicyId = slaCritical.Id,
+                ProjectId = infra.Id,
+                FirstResponseAt = now.AddDays(-50).AddMinutes(15),
+                ResolvedAt = now.AddDays(-49),
+                ClosedAt = now.AddDays(-48),
+                CreatedAt = now.AddDays(-51),
+                UpdatedAt = now.AddDays(-48),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U6, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-51) },
+                    new EscalationParticipant { UserId = U1, Role = ParticipantRole.Observer,  AssignedAt = now.AddDays(-51) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 15,   // 15 мин — отлично
+                    ResolutionTimeMinutes    = 1440, // 1 день
+                    TimeToCloseMinutes       = 4320, // 3 дня
+                    SlaViolated = false,
+                    TotalComments = 6,
+                    TotalParticipants = 2,
+                }
+            },
+
+            // DATA — закрытые с метриками
+            new()
+            {
+                Name = "BI-экспорт дублирует строки при джойне",
+                Description = "Отчёт по активным эскалациям задваивает записи при наличии нескольких участников.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Medium,
+                Type = EscalationType.Bug,
+                AuthorId = U5,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = data.Id,
+                FirstResponseAt = now.AddDays(-55).AddHours(2),
+                ResolvedAt = now.AddDays(-53),
+                ClosedAt = now.AddDays(-52),
+                CreatedAt = now.AddDays(-56),
+                UpdatedAt = now.AddDays(-52),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U5, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-56) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 120,  // ровно SLA
+                    ResolutionTimeMinutes    = 5760, // 4 дня
+                    TimeToCloseMinutes       = 5760, // 4 дня
+                    SlaViolated = false,
+                    TotalComments = 5,
+                    TotalParticipants = 1,
+                }
+            },
+            new()
+            {
+                Name = "Нет пагинации на странице отчётов",
+                Description = "При загрузке >500 записей страница отчётов зависает. Нужно добавить серверную пагинацию.",
+                Status = EscalationStatus.Closed,
+                Priority = EscalationPriority.Medium,
+                Type = EscalationType.FeatureRequest,
+                AuthorId = U1,
+                SlaPolicyId = slaStandard.Id,
+                ProjectId = data.Id,
+                FirstResponseAt = now.AddDays(-58).AddHours(5),
+                ResolvedAt = now.AddDays(-56),
+                ClosedAt = now.AddDays(-55),
+                CreatedAt = now.AddDays(-59),
+                UpdatedAt = now.AddDays(-55),
+                Participants =
+                [
+                    new EscalationParticipant { UserId = U5, Role = ParticipantRole.Assignee, AssignedAt = now.AddDays(-59) },
+                    new EscalationParticipant { UserId = U3, Role = ParticipantRole.Observer,  AssignedAt = now.AddDays(-59) },
+                ],
+                Metrics = new EscalationMetrics
+                {
+                    FirstResponseTimeMinutes = 300,  // 5 ч — нарушение SLA (120 мин)
+                    ResolutionTimeMinutes    = 4320, // 3 дня
+                    TimeToCloseMinutes       = 5760, // 4 дня
+                    SlaViolated = true,
+                    TotalComments = 7,
+                    TotalParticipants = 2,
+                }
             },
 
             // INFRA — 3 эскалации

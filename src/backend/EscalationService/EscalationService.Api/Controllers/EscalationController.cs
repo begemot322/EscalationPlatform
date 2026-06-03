@@ -60,6 +60,14 @@ public sealed class EscalationController : BaseController
         return NoContentOrError(result);
     }
 
+    [HttpGet("users-stats")]
+    [Authorize]
+    public async Task<IActionResult> GetUsersStats(CancellationToken ct)
+    {
+        var result = await _escalationService.GetUsersStatsAsync(ct);
+        return OkOrError(result);
+    }
+
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
     {
