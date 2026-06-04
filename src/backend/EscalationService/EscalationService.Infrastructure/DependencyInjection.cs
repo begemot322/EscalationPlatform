@@ -3,6 +3,8 @@ using System.Text;
 using EscalationPlatform.Database.PgSql;
 using EscalationPlatform.Shared.Options;
 using EscalationService.Application.Common.Interfaces;
+using EscalationService.Application.Services.Interfaces;
+using EscalationService.Infrastructure.Clients;
 using EscalationService.Infrastructure.Persistence;
 using EscalationService.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +26,8 @@ public static class DependencyInjection
     {
         services
             .AddPersistence(configuration)
-            .AddAuth(configuration);
+            .AddAuth(configuration)
+            .AddHttpClients(configuration);
 
         return services;
     }
@@ -56,6 +59,19 @@ public static class DependencyInjection
         return services;
     }
     
+    private static IServiceCollection AddHttpClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        var userServiceUrl = configuration["Services:UserService"] ?? "http://localhost:5219/";
+
+        services.AddHttpClient<IUserServiceClient, UserServiceClient>(client =>
+        {
+            client.BaseAddress = new Uri(userServiceUrl);
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+
+        return services;
+    }
+
     private static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()!;

@@ -52,4 +52,12 @@ public interface IProjectService
     /// <param name="id">Идентификатор проекта</param>
     /// <param name="ct">Токен отмены операции</param>
     Task<Result> DeleteAsync(long id, CancellationToken ct);
+
+    /// <summary>
+    /// Импортирует проекты из Excel файла (.xlsx).
+    /// Проекты с кодами, уже существующими в БД, пропускаются.
+    /// </summary>
+    /// <param name="fileStream">Поток .xlsx файла</param>
+    /// <param name="ct">Токен отмены операции</param>
+    Task<Result<ProjectImportResult>> ImportFromExcelAsync(Stream fileStream, CancellationToken ct);
 }

@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using EscalationPlatform.Bus.RabbitMq;
 using EscalationPlatform.OpenTelemetry;
+using EscalationPlatform.Shared.Messages;
 using EscalationService.Application;
 using EscalationService.Infrastructure;
 using EscalationService.Infrastructure.Persistence;
@@ -40,10 +42,23 @@ public static class DependencyInjection
 
         builder.Logging.AddLogging(resourceBuilder, openTelemetryEndpoint);
         
+        var rabbitMqConnectionString = configuration.GetConnectionString(BusServiceExtensions.ConnectionStringName);
+        var busConfig = configuration
+            .GetSection(BusServiceExtensions.BusConfigurationSectionName)
+            .Get<BusConfiguration>() ?? new BusConfiguration();
+
         builder.Services
             .AddTelemetry(resourceBuilder, openTelemetryEndpoint)
             .AddApplication()
-            .AddInfrastructure(configuration);
+            .AddInfrastructure(configuration)
+            .AddRabbitMq(
+                connectionString: rabbitMqConnectionString,
+                configuration: busConfig,
+                configureRabbit: (_, cfg, config) =>
+                {
+                    cfg.ConfigureMessage<ParticipantAssigned>(
+                        Exchanges.EscalationParticipantAssigned, config);
+                });
 
         return builder;
     }

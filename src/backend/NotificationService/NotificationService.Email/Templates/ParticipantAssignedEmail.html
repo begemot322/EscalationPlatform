@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    .container { max-width: 560px; margin: 32px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .header { background: #2563eb; padding: 24px 32px; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 20px; }
+    .body { padding: 32px; color: #374151; }
+    .body p { margin: 0 0 16px; line-height: 1.6; }
+    .role-badge { display: inline-block; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 12px; font-size: 13px; font-weight: bold; }
+    .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .info-table td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    .info-table td:first-child { color: #6b7280; width: 40%; }
+    .info-table td:last-child { font-weight: 500; color: #111827; }
+    .footer { padding: 16px 32px; background: #f9fafb; text-align: center; font-size: 12px; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 Вы назначены на эскалацию</h1>
+    </div>
+    <div class="body">
+      <p>Здравствуйте, <strong>{{FirstName}}</strong>!</p>
+      <p>Вы были назначены на эскалацию в роли:</p>
+      <span class="role-badge">{{Role}}</span>
+      <table class="info-table">
+        <tr>
+          <td>Эскалация</td>
+          <td>{{EscalationName}}</td>
+        </tr>
+        <tr>
+          <td>Проект</td>
+          <td>{{ProjectName}}</td>
+        </tr>
+        <tr>
+          <td>Дата назначения</td>
+          <td>{{AssignedAt}}</td>
+        </tr>
+      </table>
+      <p>Войдите в систему, чтобы ознакомиться с деталями эскалации и приступить к работе.</p>
+    </div>
+    <div class="footer">
+      WaveAccess · Платформа управления эскалациями
+    </div>
+  </div>
+</body>
+</html>

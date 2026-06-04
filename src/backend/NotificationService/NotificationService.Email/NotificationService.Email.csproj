@@ -29,6 +29,9 @@
         <None Update="Templates\MonthlyReportEmail.html">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Templates\ParticipantAssignedEmail.html">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     
 </Project>

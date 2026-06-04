@@ -29,6 +29,7 @@ public static class DependencyInjection
     /// </summary>
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddSingleton<IExcelReaderService, ExcelReaderService>();
         services.AddScoped<ISlaPolicyService, SlaPolicyService>();
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IEscalationService, Services.Implementation.EscalationService>();

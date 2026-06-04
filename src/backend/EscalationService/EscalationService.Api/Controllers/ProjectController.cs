@@ -58,4 +58,25 @@ public sealed class ProjectController : BaseController
         var result = await _projectService.DeleteAsync(id, ct);
         return NoContentOrError(result);
     }
+
+    /// <summary>
+    /// Импортирует проекты из Excel файла (.xlsx).
+    /// Доступно только администраторам.
+    /// Ожидаемые колонки: Название (обяз.), Код (обяз., уникален), Описание (необяз.).
+    /// Проекты с кодами, уже существующими в системе, пропускаются.
+    /// </summary>
+    [HttpPost("import")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Import(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return Problem(statusCode: 400, title: "INVALID_FILE", detail: "Файл не передан или пустой.");
+
+        if (!file.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            return Problem(statusCode: 400, title: "INVALID_FORMAT", detail: "Поддерживается только формат .xlsx.");
+
+        await using var stream = file.OpenReadStream();
+        var result = await _projectService.ImportFromExcelAsync(stream, ct);
+        return OkOrError(result);
+    }
 }

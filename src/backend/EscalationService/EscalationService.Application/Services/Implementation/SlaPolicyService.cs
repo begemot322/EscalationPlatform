@@ -3,6 +3,7 @@ using EscalationPlatform.Shared.Result;
 using EscalationService.Application.Common;
 using EscalationService.Application.Common.Interfaces;
 using EscalationService.Application.DTOs.SlaPolicy;
+using EscalationService.Application.Mappings;
 using EscalationService.Application.Services.Interfaces;
 using EscalationService.Domain.Entities;
 using FluentValidation;
@@ -40,7 +41,7 @@ public sealed class SlaPolicyService : ISlaPolicyService
         _logger.LogInformation("Retrieved {Count} sla policies (page {Page})", result.TotalCount, result.Page);
 
         var paged = new PagedResult<SlaPolicyResponse>(
-            result.Items.Select(ToResponse).ToList(),
+            result.Items.Select(SlaPolicyMapper.ToResponse).ToList(),
             result.TotalCount,
             result.Page,
             result.PageSize);
@@ -60,7 +61,7 @@ public sealed class SlaPolicyService : ISlaPolicyService
             return Result<SlaPolicyResponse>.Failure(Error.NotFound<SlaPolicy>(id));
         }
 
-        return Result<SlaPolicyResponse>.Success(ToResponse(policy));
+        return Result<SlaPolicyResponse>.Success(SlaPolicyMapper.ToResponse(policy));
     }
 
     public async Task<Result> CreateAsync(CreateSlaPolicyRequest request, CancellationToken ct)
@@ -140,8 +141,4 @@ public sealed class SlaPolicyService : ISlaPolicyService
         return Result.Success();
     }
 
-    private static SlaPolicyResponse ToResponse(SlaPolicy p) => new(
-        p.Id, p.Name, p.Description, p.MinPriorityLevel.ToString(),
-        p.IsActive, p.ResponseTimeMinutes, p.ResolutionTimeMinutes,
-        p.CreatedAt, p.UpdatedAt);
 }

@@ -9,12 +9,12 @@ namespace UserService.Infrastructure.Persistence;
 public static class DataSeeder
 {
     // Фиксированные GUIDs — используются также в EscalationService сидере
-    public static readonly Guid User1 = new("00000000-0000-0000-0000-000000000001"); // Tech Lead / Admin
-    public static readonly Guid User2 = new("00000000-0000-0000-0000-000000000002"); // Project Manager / Manager
-    public static readonly Guid User3 = new("00000000-0000-0000-0000-000000000003"); // Backend Developer
-    public static readonly Guid User4 = new("00000000-0000-0000-0000-000000000004"); // Frontend Developer
-    public static readonly Guid User5 = new("00000000-0000-0000-0000-000000000005"); // QA Engineer
-    public static readonly Guid User6 = new("00000000-0000-0000-0000-000000000006"); // DevOps
+    private static readonly Guid User1 = new("00000000-0000-0000-0000-000000000001"); // Tech Lead / Admin
+    private static readonly Guid User2 = new("00000000-0000-0000-0000-000000000002"); // Project Manager / Manager
+    private static readonly Guid User3 = new("00000000-0000-0000-0000-000000000003"); // Backend Developer
+    private static readonly Guid User4 = new("00000000-0000-0000-0000-000000000004"); // Frontend Developer
+    private static readonly Guid User5 = new("00000000-0000-0000-0000-000000000005"); // QA Engineer
+    private static readonly Guid User6 = new("00000000-0000-0000-0000-000000000006"); // DevOps
 
     private const string DefaultPassword = "Seed1234!";
 

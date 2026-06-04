@@ -1,3 +1,4 @@
+using EscalationPlatform.Shared.Messages;
 using EscalationPlatform.Shared.Pagination;
 using EscalationPlatform.Shared.Result;
 using EscalationService.Application.Common;
@@ -5,10 +6,12 @@ using EscalationService.Application.Common.Interfaces;
 using EscalationService.Application.DTOs.Escalation;
 using EscalationService.Application.DTOs.Project;
 using EscalationService.Application.Extensions;
+using EscalationService.Application.Mappings;
 using EscalationService.Application.Services.Interfaces;
 using EscalationService.Domain.Entities;
 using EscalationService.Domain.Enums;
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -19,17 +22,23 @@ public sealed class EscalationService : IEscalationService
     private readonly IEscalationDbContext _db;
     private readonly IValidator<CreateEscalationRequest> _createValidator;
     private readonly IValidator<UpdateEscalationRequest> _updateValidator;
+    private readonly IUserServiceClient _userServiceClient;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<EscalationService> _logger;
 
     public EscalationService(
         IEscalationDbContext db,
         IValidator<CreateEscalationRequest> createValidator,
         IValidator<UpdateEscalationRequest> updateValidator,
+        IUserServiceClient userServiceClient,
+        IPublishEndpoint publishEndpoint,
         ILogger<EscalationService> logger)
     {
         _db = db;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _userServiceClient = userServiceClient;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -48,7 +57,7 @@ public sealed class EscalationService : IEscalationService
         _logger.LogInformation("Retrieved {Count} escalations (page {Page})", page.TotalCount, page.Page);
 
         var paged = new PagedResult<EscalationSummaryResponse>(
-            page.Items.Select(ToSummaryResponse).ToList(),
+            page.Items.Select(EscalationMapper.ToSummaryResponse).ToList(),
             page.TotalCount, page.Page, page.PageSize);
 
         return Result<PagedResult<EscalationSummaryResponse>>.Success(paged);
@@ -72,7 +81,7 @@ public sealed class EscalationService : IEscalationService
             return Result<EscalationResponse>.Failure(Error.NotFound<Escalation>(id));
         }
 
-        return Result<EscalationResponse>.Success(ToResponse(escalation));
+        return Result<EscalationResponse>.Success(EscalationMapper.ToResponse(escalation));
     }
 
     public async Task<Result> CreateAsync(CreateEscalationRequest request, CancellationToken ct)
@@ -123,6 +132,16 @@ public sealed class EscalationService : IEscalationService
         _logger.LogInformation("Created Escalation {Id} (project {ProjectId}, sla {SlaPolicyId})",
             escalation.Id, escalation.ProjectId, escalation.SlaPolicyId);
 
+        // Уведомляем всех назначенных участников (кроме автора — он и так знает)
+        if (escalation.Participants.Count > 0)
+        {
+            var participantsToNotify = escalation.Participants
+                .Where(p => p.UserId != request.AuthorId)
+                .ToList();
+            await PublishParticipantNotificationsAsync(
+                escalation, participantsToNotify, ct);
+        }
+
         return Result.Success();
     }
 
@@ -155,17 +174,26 @@ public sealed class EscalationService : IEscalationService
         escalation.FirstResponseAt = request.FirstResponseAt;
         escalation.ResolvedAt = request.ResolvedAt;
 
+        List<EscalationParticipant>? newParticipants = null;
+
         if (request.Participants is not null)
         {
+            var existingIds = escalation.Participants.Select(p => p.UserId).ToHashSet();
             escalation.Participants.Clear();
             var now = DateTimeOffset.UtcNow;
+            newParticipants = [];
             foreach (var p in request.Participants)
-                escalation.Participants.Add(new EscalationParticipant
+            {
+                var participant = new EscalationParticipant
                 {
                     UserId = p.UserId,
                     Role = p.Role,
                     AssignedAt = now
-                });
+                };
+                escalation.Participants.Add(participant);
+                if (!existingIds.Contains(p.UserId))
+                    newParticipants.Add(participant);
+            }
         }
 
         if (request.Criteria is not null)
@@ -197,6 +225,10 @@ public sealed class EscalationService : IEscalationService
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated Escalation {Id} → status {Status}", id, request.Status);
+
+        // Уведомляем только новых участников
+        if (newParticipants is { Count: > 0 })
+            await PublishParticipantNotificationsAsync(escalation, newParticipants, ct);
 
         return Result.Success();
     }
@@ -458,46 +490,55 @@ public sealed class EscalationService : IEscalationService
         };
     }
 
-    private static EscalationSummaryResponse ToSummaryResponse(Escalation e) => new(
-        e.Id,
-        e.Name,
-        e.Status,
-        e.Priority,
-        e.Type,
-        e.AuthorId,
-        e.SlaPolicyId,
-        e.SlaPolicy.Name,
-        e.ProjectId,
-        e.Project.Name,
-        e.ClosedAt,
-        e.CreatedAt,
-        e.UpdatedAt);
+    /// <summary>
+    /// Резолвит email участников через UserService и публикует ParticipantAssigned для каждого.
+    /// </summary>
+    private async Task PublishParticipantNotificationsAsync(
+        Escalation escalation,
+        IReadOnlyList<EscalationParticipant> participants,
+        CancellationToken ct)
+    {
+        try
+        {
+            var userIds = participants.Select(p => p.UserId).Distinct().ToList();
+            var users = await _userServiceClient.GetByIdsAsync(userIds, ct);
+            var userMap = users.ToDictionary(u => u.Id);
 
-    private static EscalationResponse ToResponse(Escalation e) => new(
-        e.Id,
-        e.Name,
-        e.Description,
-        e.Status,
-        e.Priority,
-        e.Type,
-        e.AuthorId,
-        e.SlaPolicyId,
-        e.SlaPolicy.Name,
-        e.ProjectId,
-        e.Project.Name,
-        e.FirstResponseAt,
-        e.ResolvedAt,
-        e.ClosedAt,
-        e.Participants.Select(p => new EscalationParticipantResponse(p.UserId, p.Role, p.AssignedAt)).ToList(),
-        e.Criteria.Select(c => new CriterionResponse(c.Id, c.Name, c.Description, c.IsCompleted)).ToList(),
-        e.Comments.Select(c => new CommentResponse(c.Id, c.Text, c.IsSystem, c.Type, c.UserId, c.CreatedAt)).ToList(),
-        e.Metrics is null ? null : new EscalationMetricsResponse(
-            e.Metrics.FirstResponseTimeMinutes,
-            e.Metrics.ResolutionTimeMinutes,
-            e.Metrics.TimeToCloseMinutes,
-            e.Metrics.SlaViolated,
-            e.Metrics.TotalComments,
-            e.Metrics.TotalParticipants),
-        e.CreatedAt,
-        e.UpdatedAt);
+            var projectName = escalation.Project?.Name ?? string.Empty;
+            var now = DateTimeOffset.UtcNow;
+
+            foreach (var participant in participants)
+            {
+                if (!userMap.TryGetValue(participant.UserId, out var user)) continue;
+
+                var roleLabel = participant.Role switch
+                {
+                    ParticipantRole.Assignee => "Исполнитель",
+                    ParticipantRole.Observer => "Наблюдатель",
+                    ParticipantRole.Approver => "Согласующий",
+                    _ => participant.Role.ToString()
+                };
+
+                await _publishEndpoint.Publish(new ParticipantAssigned(
+                    EscalationId:      escalation.Id,
+                    EscalationName:    escalation.Name,
+                    ProjectName:       projectName,
+                    RecipientEmail:    user.Email,
+                    RecipientFirstName: user.FirstName,
+                    Role:              roleLabel,
+                    AssignedAt:        now), ct);
+
+                _logger.LogInformation(
+                    "ParticipantAssigned published: escalation {Id} → {Email} ({Role})",
+                    escalation.Id, user.Email, roleLabel);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Не прерываем основную операцию из-за ошибки уведомлений
+            _logger.LogError(ex,
+                "Failed to publish ParticipantAssigned for escalation {Id}", escalation.Id);
+        }
+    }
+
 }

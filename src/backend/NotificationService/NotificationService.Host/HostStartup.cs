@@ -41,6 +41,7 @@ public static class HostStartup
                             mt.AddConsumer<OtpCodeRequestedConsumer>();
                             mt.AddConsumer<SlaBreachedConsumer>();
                             mt.AddConsumer<MonthlyReportConsumer>();
+                            mt.AddConsumer<ParticipantAssignedConsumer>();
                         },
                         configureRabbit: (context, cfg, config) =>
                         {
@@ -55,6 +56,10 @@ public static class HostStartup
                             cfg.ConfigureConsumer<MonthlyReportConsumer>(
                                 context,
                                 exchangeName: Exchanges.EscalationMonthlyReport,
+                                config);
+                            cfg.ConfigureConsumer<ParticipantAssignedConsumer>(
+                                context,
+                                exchangeName: Exchanges.EscalationParticipantAssigned,
                                 config);
                         });
 

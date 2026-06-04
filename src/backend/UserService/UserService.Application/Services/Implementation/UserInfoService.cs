@@ -44,6 +44,32 @@ public sealed class UserInfoService : IUserService
         return Result<PagedResult<UserResponse>>.Success(result);
     }
 
+    public async Task<List<UserResponse>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0) return [];
+
+        var users = await _db.Users
+            .AsNoTracking()
+            .Where(u => idList.Contains(u.Id))
+            .ToListAsync(ct);
+
+        return users.Select(MapToResponse).ToList();
+    }
+
+    public async Task<List<UserResponse>> GetByEmailsAsync(IEnumerable<string> emails, CancellationToken ct)
+    {
+        var emailList = emails.Select(e => e.Trim().ToLower()).Where(e => !string.IsNullOrEmpty(e)).ToList();
+        if (emailList.Count == 0) return [];
+
+        var users = await _db.Users
+            .AsNoTracking()
+            .Where(u => emailList.Contains(u.Email.ToLower()))
+            .ToListAsync(ct);
+
+        return users.Select(MapToResponse).ToList();
+    }
+
     private static UserResponse MapToResponse(User user) => new(
         user.Id,
         user.FirstName,
