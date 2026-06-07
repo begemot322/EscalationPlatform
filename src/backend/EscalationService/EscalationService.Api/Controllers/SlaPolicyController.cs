@@ -1,10 +1,12 @@
 using EscalationPlatform.Shared.Pagination;
 using EscalationService.Application.DTOs.SlaPolicy;
 using EscalationService.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EscalationService.Api.Controllers;
 
+[Authorize]
 [Route("api/v1/sla-policy")]
 public sealed class SlaPolicyController : BaseController
 {
@@ -30,6 +32,7 @@ public sealed class SlaPolicyController : BaseController
     }
 
     [HttpPost]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> Create([FromBody] CreateSlaPolicyRequest request, CancellationToken ct)
     {
         var result = await _slaPolicyService.CreateAsync(request, ct);
@@ -37,6 +40,7 @@ public sealed class SlaPolicyController : BaseController
     }
 
     [HttpPut("{id:long}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> Update([FromRoute] long id, [FromBody] UpdateSlaPolicyRequest request, CancellationToken ct)
     {
         var result = await _slaPolicyService.UpdateAsync(id, request, ct);
@@ -44,6 +48,7 @@ public sealed class SlaPolicyController : BaseController
     }
 
     [HttpDelete("{id:long}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken ct)
     {
         var result = await _slaPolicyService.DeleteAsync(id, ct);
