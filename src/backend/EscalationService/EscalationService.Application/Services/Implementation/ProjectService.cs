@@ -194,12 +194,13 @@ public async Task<Result<PagedResult<ProjectResponse>>> GetAllAsync(ProjectFilte
 
         if (!readResult.IsSuccess)
         {
-            var errors = readResult.StructureErrors
-                .Concat(readResult.EmptyValueErrors)
-                .Concat(readResult.DuplicateValueErrors)
-                .Select(e => e.RowNumber == 0
-                    ? e.ColumnName
-                    : $"Строка {e.RowNumber}, колонка «{e.ColumnName}»");
+            var errors =
+                readResult.StructureErrors
+                    .Select(e => $"Отсутствует обязательная колонка «{e.ColumnName}»")
+                .Concat(readResult.EmptyValueErrors
+                    .Select(e => $"Строка {e.RowNumber}: не заполнено обязательное поле «{e.ColumnName}»"))
+                .Concat(readResult.DuplicateValueErrors
+                    .Select(e => $"Строка {e.RowNumber}: дублирующееся значение в колонке «{e.ColumnName}»"));
 
             return Result<ProjectImportResult>.Failure(
                 Error.ValidationFailed(errors));

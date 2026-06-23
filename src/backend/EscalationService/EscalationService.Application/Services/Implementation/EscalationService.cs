@@ -95,8 +95,8 @@ public sealed class EscalationService : IEscalationService
         if (!slaPolicyExists)
             return Result.Failure(Error.NotFound<SlaPolicy>(request.SlaPolicyId));
 
-        var projectExists = await _db.Projects.AnyAsync(p => p.Id == request.ProjectId, ct);
-        if (!projectExists)
+        var project = await _db.Projects.FirstOrDefaultAsync(p => p.Id == request.ProjectId, ct);
+        if (project is null)
             return Result.Failure(Error.NotFound<Project>(request.ProjectId));
 
         var now = DateTimeOffset.UtcNow;
@@ -126,6 +126,7 @@ public sealed class EscalationService : IEscalationService
             }).ToList() ?? []
         };
 
+        escalation.Project = project; // нужно для имени проекта в уведомлениях
         _db.Escalations.Add(escalation);
         await _db.SaveChangesAsync(ct);
 
@@ -158,6 +159,7 @@ public sealed class EscalationService : IEscalationService
             .Include(e => e.Comments)
             .Include(e => e.Metrics)
             .Include(e => e.SlaPolicy)
+            .Include(e => e.Project)
             .FirstOrDefaultAsync(e => e.Id == id, ct);
 
         if (escalation is null)
@@ -520,13 +522,13 @@ public sealed class EscalationService : IEscalationService
                 };
 
                 await _publishEndpoint.Publish(new ParticipantAssigned(
-                    EscalationId:      escalation.Id,
-                    EscalationName:    escalation.Name,
-                    ProjectName:       projectName,
-                    RecipientEmail:    user.Email,
+                    EscalationId: escalation.Id,
+                    EscalationName: escalation.Name,
+                    ProjectName: projectName,
+                    RecipientEmail: user.Email,
                     RecipientFirstName: user.FirstName,
-                    Role:              roleLabel,
-                    AssignedAt:        now), ct);
+                    Role: roleLabel,
+                    AssignedAt: now), ct);
 
                 _logger.LogInformation(
                     "ParticipantAssigned published: escalation {Id} → {Email} ({Role})",

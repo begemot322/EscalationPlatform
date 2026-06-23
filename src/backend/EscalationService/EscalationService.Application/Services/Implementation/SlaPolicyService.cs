@@ -140,5 +140,4 @@ public sealed class SlaPolicyService : ISlaPolicyService
 
         return Result.Success();
     }
-
 }
