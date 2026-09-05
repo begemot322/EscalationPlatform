@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Код подтверждения</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background:#1e40af;padding:32px 40px;">
+                        <p style="margin:0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">
+                            Escalation Platform
+                        </p>
+                        <p style="margin:4px 0 0;font-size:13px;color:#93c5fd;">
+                            Система управления эскалациями
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding:40px 40px 32px;">
+                        <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111827;">
+                            Подтверждение email
+                        </p>
+                        <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+                            Привет, {{FirstName}}! Для входа в систему введите код подтверждения:
+                        </p>
+
+                        <!-- OTP Code -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="center" style="padding:24px 0;">
+                                    <div style="display:inline-block;background:#f0f4ff;border:2px dashed #1e40af;border-radius:12px;padding:20px 48px;">
+                      <span style="font-size:42px;font-weight:800;letter-spacing:12px;color:#1e40af;font-family:'Courier New',monospace;">
+                        {{Code}}
+                      </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:0 0 24px;font-size:14px;color:#6b7280;text-align:center;">
+                            Код действителен в течение <strong style="color:#111827;">{{ExpiresMinutes}} минут</strong>
+                        </p>
+
+                        <!-- Warning -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="background:#fff7ed;border-left:4px solid #f97316;border-radius:0 8px 8px 0;padding:14px 16px;">
+                                    <p style="margin:0;font-size:13px;color:#92400e;line-height:1.5;">
+                                        Если вы не запрашивали этот код — просто проигнорируйте письмо. Никому не передавайте код.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;">
+                        <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">
+                            © 2025 Escalation Platform. Это письмо сгенерировано автоматически.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

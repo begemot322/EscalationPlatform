@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>SchedulerService</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\EscalationPlatform.Bus.RabbitMq\EscalationPlatform.Bus.RabbitMq.csproj" />
+        <ProjectReference Include="..\..\EscalationPlatform.OpenTelemetry\EscalationPlatform.OpenTelemetry.csproj" />
+        <ProjectReference Include="..\..\EscalationPlatform.Shared\EscalationPlatform.Shared.csproj" />
+        <ProjectReference Include="..\SchedulerService.Infrastructure\SchedulerService.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

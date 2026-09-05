@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
+        <PackageReference Include="MailKit" Version="4.15.1" />
+        <PackageReference Include="MassTransit.Abstractions" Version="8.3.4" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.13" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.13" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\EscalationPlatform.Shared\EscalationPlatform.Shared.csproj" />
+        <ProjectReference Include="..\NotificationService.Pdf\NotificationService.Pdf.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Templates\OtpEmail.html">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+        <None Update="Templates\SlaBreachedEmail.html">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Templates\MonthlyReportEmail.html">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Templates\ParticipantAssignedEmail.html">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    
+</Project>
